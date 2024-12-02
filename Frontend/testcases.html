@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="testcases">Test Cases</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            400: '#FF7F50',
+                            500: '#FF6347',
+                            600: '#FF4500',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/testcases.css">
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
+        <!-- Tree Structure Panel -->
+        <div id="testCaseTree" class="w-1/4 bg-white dark:bg-gray-800 px-4 pt-6 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen sticky top-0">
+            <div class="flex-1 flex flex-col">
+                <div class="space-y-3 pr-4 flex-1 overflow-y-auto" style="max-height: calc(100vh - 140px);">
+                    <!-- Search Section -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 gap-2">
+                            <i class="fas fa-search text-[#FF7F50]"></i>
+                        </div>
+                        <input type="search" placeholder="Search..." class="w-full pl-4 pr-16 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF7F50] shadow-sm transition-all duration-300 hover:shadow-md dark:bg-gray-800 dark:text-gray-200" aria-label="Search files and folders">
+                    </div>
+
+                    <!-- Filter and Sort -->
+                    <div class="flex space-x-2">
+                        <select class="flex-1 px-2 py-1.5 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF7F50] shadow-sm transition-all duration-300 hover:shadow-md dark:bg-gray-800 dark:text-gray-200" aria-label="Filter options">
+                            <option>Filter by</option>
+                            <option>Name</option>
+                            <option>Date</option>
+                            <option>Type</option>
+                        </select>
+                        <select class="flex-1 px-2 py-1.5 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF7F50] shadow-sm transition-all duration-300 hover:shadow-md dark:bg-gray-800 dark:text-gray-200" aria-label="Sort options">
+                            <option>Sort by</option>
+                            <option>A-Z</option>
+                            <option>Date</option>
+                            <option>Type</option>
+                        </select>
+                    </div>
+
+                    <!-- Theme Toggle and Create Root Folder Buttons -->
+                    <div class="flex space-x-2">
+                        <button onclick="createRootFolder()" class="flex-1 px-4 py-2.5 bg-[#FF7F50] text-white rounded-xl hover:bg-[#FF6347] transition-colors duration-300 flex items-center justify-center space-x-2">
+                            <i class="fas fa-folder-plus"></i>
+                            <span>Create Root Folder</span>
+                        </button>
+                    </div>
+
+                    <!-- Tree Structure -->
+                    <div class="space-y-2" role="tree" aria-label="Folder structure" id="folderTree">
+                        <!-- Tree items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Bottom Section with Back Button -->
+                <div class="absolute bottom-4 left-4 right-4">
+                    <a href="index.html" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center space-x-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Case Info Panel -->
+        <div id="testCaseInfoContainer" class="w-3/4 bg-white dark:bg-gray-800 p-6 overflow-y-auto hidden">
+            <div id="testCaseTemplate">
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+                    <div class="p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex space-x-4" id="actionButtons">
+                                <button onclick="toggleEditMode()" id="editButton" class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Edit
+                                </button>
+                                <button onclick="saveChanges()" id="saveButton" class="hidden" data-active-class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Save
+                                </button>
+                                <button onclick="cancelEdit()" id="cancelButton" class="hidden" data-active-class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    Cancel
+                                </button>
+                                <button class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    Move
+                                </button>
+                                <button class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    Delete
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600">Type:</label>
+                                <select id="testType" class="bg-purple-100 text-purple-800 text-sm font-medium px-4 py-1 rounded-full" disabled>
+                                    <option value="automated">Automated</option>
+                                    <option value="manual">Manual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-4">
+                            <p id="createdDate"></p>
+                            <p id="updatedDate"></p>
+                        </div>
+                        <h1 id="testTitle" class="text-3xl font-bold text-gray-800 mb-4"></h1>
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h2 class="text-lg font-semibold text-gray-700 mb-2">Description</h2>
+                                <div id="descriptionContent" class="text-gray-600">
+                                    <span class="text-gray-400 italic">No description available</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h2 class="text-lg font-semibold text-gray-700">Conditions</h2>
+                                    <button onclick="addCondition()" id="addConditionBtn" class="hidden inline-flex items-center p-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <ul id="conditionsContent" class="list-disc list-inside text-gray-600">
+                                    <li class="text-gray-400 italic">No conditions specified</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h2 class="text-lg font-semibold text-gray-700">Steps & Expected Results</h2>
+                                    <button onclick="addStep()" id="addStepBtn" class="hidden inline-flex items-center p-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="space-y-6" id="stepsContent">
+                                    <div class="text-gray-400 italic text-center py-4">No steps defined</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h2 class="text-lg font-semibold text-gray-700 mb-2">Priority</h2>
+                                    <select id="prioritySelect" class="bg-gray-100 text-gray-500 text-sm font-medium px-3 py-1 rounded-full border border-gray-200" disabled>
+                                        <option value="" class="bg-gray-100 text-gray-500">No data</option>
+                                        <option value="high">High</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h2 class="text-lg font-semibold text-gray-700 mb-2">Platform</h2>
+                                    <select id="platformSelect" class="bg-gray-100 text-gray-500 text-sm font-medium px-3 py-1 rounded-full border border-gray-200" disabled>
+                                        <option value="" class="bg-gray-100 text-gray-500">No data</option>
+                                        <option value="any" class="bg-purple-100 text-purple-800">Any Platform</option>
+                                        <option value="chrome">Web - Chrome</option>
+                                        <option value="firefox">Web - Firefox</option>
+                                        <option value="safari">Web - Safari</option>
+                                        <option value="edge">Web - Edge</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h2 class="text-lg font-semibold text-gray-700 mb-2">Test Case Code</h2>
+                                <pre id="testCaseCode" class="bg-gray-800 text-gray-200 p-4 rounded-lg overflow-x-auto">describe('Login Test', () => {
+    it('should login with valid credentials', () => {
+        cy.visit('/login');
+        cy.get('#username').type('testuser');
+        cy.get('#password').type('password123');
+        cy.get('#loginBtn').click();
+        cy.url().should('include', '/dashboard');
+    });
+});</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/testcases.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+</html>

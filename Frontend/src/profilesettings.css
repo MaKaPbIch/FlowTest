@@ -1,0 +1,28 @@
+.bg-coral-500 {
+    background-color: #FF6B6B;
+}
+
+.hover\:bg-coral-600:hover {
+    background-color: #FF5252;
+}
+
+.border-coral-400 {
+    border-color: #FF8A8A;
+}
+
+.focus\:ring-coral-500:focus {
+    --tw-ring-color: #FF6B6B;
+}
+
+.text-coral-500 {
+    color: #FF6B6B;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}

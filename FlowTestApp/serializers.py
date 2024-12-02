@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Folder, TestCase, TestRun, AutomationScript, Project, SchedulerEvent, CustomUser, Role
+from django.contrib.auth.models import User
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,4 +74,4 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'phone_number', 'first_name', 'last_name', 'middle_name', 'role', 'role_id']
+        fields = ['id', 'username', 'email', 'phone_number', 'first_name', 'last_name', 'middle_name', 'role', 'role_id', 'avatar', 'theme']

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="dashboard">Test Management Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            50: '#FFF0EB',
+                            100: '#FFE1D6',
+                            200: '#FFC3B3',
+                            300: '#FFA590',
+                            400: '#FF876D',
+                            500: '#FF7F50',
+                            600: '#FF6347',
+                            700: '#FF4733',
+                            800: '#FF2B20',
+                            900: '#FF0F0D',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/calendar.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen overflow-y-auto">
+            <div class="p-4 sticky top-0">
+                <img src="images/FlowTest.png" alt="Company Logo" class="h-8 w-auto mb-8">
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span data-i18n="testCases">Test Cases</span>
+                    </a>
+                    <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span data-i18n="events">Event Calendar</span>
+                    </a>
+                    <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span data-i18n="testRuns">Test Runs</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="dashboard">Dashboard</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
+                        <!-- Project Selector -->
+                        <div class="w-48">
+                            <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                <option value="" selected>Все проекты</option>
+                            </select>
+                        </div>
+                        <!-- Calendar Button -->
+                        <button aria-label="Schedule new event" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-600 active:scale-95 group-hover:rotate-3" onclick="toggleCalendar()" data-tooltip="Click to add new event">
+                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2"></path>
+                            </svg>
+                        </button>
+                        <!-- Notifications -->
+                        <button onclick="toggleNotifications()" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center relative">
+                            <span class="sr-only" data-i18n="notifications">Notifications</span>
+                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <!-- User Menu -->
+                        <div class="relative z-50">
+                            <button id="userMenuButton" class="flex items-center space-x-3">
+                                <img id="userAvatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" alt="User avatar" class="w-10 h-10 rounded-full">
+                                <span id="userName" class="text-sm font-medium text-gray-700 dark:text-gray-200" data-i18n="username">John Doe</span>
+                            </button>
+                            <!-- User Dropdown Menu -->
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md py-1 shadow-lg z-50">
+                                <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                                <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="logout">Logout</a>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div id="notification-root" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg py-4 z-50"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4">
+                    <!-- Test Case Execution Chart -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Test Case Execution</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+
+                    <!-- Bug Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Bug Distribution</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+
+                    <!-- Regression Test Runs -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Regression Test Runs</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+
+                    <!-- Tester Efficiency -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Tester Efficiency</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+
+                    <!-- Test Status Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Test Status Distribution</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+
+                    <!-- Frequently Failing Tests -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Frequently Failing Tests</h3>
+                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <script src="js/projects.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/init.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Проверяем срок действия сессии
+            const sessionExpires = sessionStorage.getItem('session_expires');
+            if (sessionExpires && Date.now() > parseInt(sessionExpires)) {
+                console.log('Session expired, clearing tokens...');
+                localStorage.removeItem('access');
+                localStorage.removeItem('refresh');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            console.log('Checking authentication...');
+            const access = localStorage.getItem('access');
+            const refresh = localStorage.getItem('refresh');
+            
+            if (!access && !refresh) {
+                console.log('No tokens found, redirecting to login...');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            if (!access && refresh) {
+                console.log('Attempting to refresh token...');
+                try {
+                    const newToken = await refreshToken();
+                    if (!newToken) {
+                        throw new Error('Failed to refresh token');
+                    }
+                } catch (error) {
+                    console.error('Token refresh failed:', error);
+                    localStorage.removeItem('access');
+                    localStorage.removeItem('refresh');
+                    window.location.href = '/login.html';
+                    return;
+                }
+            }
+            
+            console.log('Authentication check passed');
+            loadUserData();
+            initializeUserMenu();
+        });
+
+        async function loadUserData() {
+            try {
+                const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/get_current_user/');
+                if (!response.ok) {
+                    throw new Error('Failed to load user data');
+                }
+                const userData = await response.json();
+                
+                document.getElementById('userName').textContent = userData.username || 'User';
+                
+                const avatarElement = document.getElementById('userAvatar');
+                if (userData.avatar) {
+                    avatarElement.src = userData.avatar;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                // В случае ошибки загрузки данных, не перенаправляем на логин
+                // просто показываем дефолтные значения
+                document.getElementById('userName').textContent = 'User';
+            }
+        }
+
+        async function logout() {
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            sessionStorage.removeItem('session_expires');
+            window.location.href = '/login.html';
+        }
+
+        function initializeUserMenu() {
+            const menuButton = document.getElementById('userMenuButton');
+            const menu = document.getElementById('userMenu');
+            let isMenuOpen = false;
+
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                isMenuOpen = !isMenuOpen;
+                if (isMenuOpen) {
+                    menu.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (isMenuOpen && !menu.contains(e.target) && !menuButton.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    isMenuOpen = false;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

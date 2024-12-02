@@ -128,14 +128,17 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'  # URL для доступа к загруженным файлам
+MEDIA_ROOT = BASE_DIR / 'media'  # Директория для хранения загруженных файлов
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://localhost:8080",
+    "http://127.0.0.1:8080"
 ]
 
 # Удалите следующие строки, так как они конфликтуют

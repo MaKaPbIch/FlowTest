@@ -46,6 +46,8 @@ class TestCase(models.Model):
     expected_results = models.TextField(blank=True, null=True)
     priority = models.CharField(max_length=50, default="Medium")
     platform = models.CharField(max_length=50, default="Any")
+    test_type = models.CharField(max_length=50, choices=[('manual', 'Manual'), ('automated', 'Automated')], default='manual')
+    test_code = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -92,11 +94,24 @@ class Role(models.Model):
         return self.name
 
 class CustomUser(AbstractUser):
-    phone_number = models.CharField(max_length=15, blank=True)
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('ru', 'Russian'),
+        ('de', 'German'),
+    ]
+    THEME_CHOICES = [
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+    ]
+
     middle_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Отчество", default="")
     first_name = models.CharField(max_length=150, blank=False, verbose_name="Имя", default="Имя")
     last_name = models.CharField(max_length=150, blank=False, verbose_name="Фамилия", default="Фамилия")
-    role = models.ForeignKey(Role, on_delete=models.PROTECT, null=True, blank=True, related_name='users')
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
+    phone_number = models.CharField(max_length=15, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    theme = models.CharField(max_length=5, choices=THEME_CHOICES, default='light')
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
 
     def save(self, *args, **kwargs):
         # Save user first to ensure `id` is generated
