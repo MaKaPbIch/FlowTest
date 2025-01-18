@@ -1,174 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="profile">Profile Settings</title>
+    <title>Profile Settings</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        coral: {
-                            400: '#FF7F50',
-                            500: '#FF6347',
-                            600: '#FF4500',
-                        },
-                    },
-                },
-            },
-        }
-    </script>
+    <script src="js/theme-preloader.js"></script>
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme-manager.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="styles/profilesettings.css">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-            <div class="px-8 py-6">
-                <div class="flex items-center justify-between mb-6">
-                    <button onclick="window.location.href='index.html'" class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-150">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back
-                    </button>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Profile Settings</h1>
-                <form id="profileForm" class="space-y-6">
-                    <div class="flex flex-col items-center space-y-4">
-                        <div class="relative group">
-                            <img id="avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Current profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-coral-400 group-hover:opacity-75 transition-opacity duration-150">
-                            <label for="avatar-upload" class="absolute bottom-0 right-0 bg-coral-500 text-white p-2 rounded-full cursor-pointer hover:bg-coral-600 transition-colors duration-150">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+<body class="bg-red-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-95 transition-all duration-300 hover:shadow-2xl">
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-3xl font-bold text-red-500" data-i18n="Profile Settings">Profile Settings</h1>
+                <button onclick="window.location.href='index.html'" class="text-gray-600 hover:text-red-500 transition-colors duration-300 transform hover:scale-110" aria-label="Back">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="md:col-span-1">
+                    <div class="text-center">
+                        <div class="relative inline-block group">
+                            <img id="avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile picture" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg ring-4 ring-red-100 transition-transform duration-300 group-hover:scale-105">
+                            <label for="avatar-upload" class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-red-50 transition-all duration-300 transform hover:scale-110">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
+                                <input type="file" id="avatar-upload" class="hidden" accept="image/*" aria-label="Upload new profile picture">
                             </label>
-                            <input type="file" id="avatar-upload" class="hidden" accept="image/*" aria-label="Upload profile picture">
                         </div>
+                        <p class="mt-4 text-sm text-gray-500 font-medium" data-i18n="Allowed formats: JPG, PNG, GIF">Allowed formats: JPG, PNG, GIF</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-                            <input type="text" id="firstName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                        </div>
-                        <div class="space-y-2">
-                            <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-                            <input type="text" id="lastName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                        </div>
-                        <div class="space-y-2">
-                            <label for="middleName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Middle Name</label>
-                            <input type="text" id="middleName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                        </div>
-                        <div class="space-y-2">
-                            <label for="nickname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nickname</label>
-                            <input type="text" id="nickname" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                        </div>
-                        <div class="space-y-2 md:col-span-2">
-                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
-                            <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                        </div>
-                        <div class="space-y-2 md:col-span-2">
-                            <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
-                            <div class="relative">
-                                <input type="password" id="currentPassword" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                                <button type="button" onclick="togglePassword('currentPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
+                </div>
+
+                <div class="md:col-span-2">
+                    <form id="profileForm">
+                        <div class="space-y-6">
+                            <div class="group">
+                                <label for="username" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Username">Username</label>
+                                <input type="text" id="username" name="username" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Leave blank if you don't want to change password</p>
-                        </div>
-                        <div class="space-y-2 md:col-span-2">
-                            <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
-                            <div class="relative">
-                                <input type="password" id="newPassword" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                                <button type="button" onclick="togglePassword('newPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="mt-1">
-                                <div class="h-1 bg-gray-200 dark:bg-gray-600 rounded-full">
-                                    <div id="passwordStrength" class="password-strength"></div>
+
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="group">
+                                    <label for="firstName" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="First Name">First Name</label>
+                                    <input type="text" id="firstName" name="firstName" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Password must contain at least 8 characters, including uppercase, lowercase, number and special character</p>
+                                <div class="group">
+                                    <label for="lastName" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Last Name">Last Name</label>
+                                    <input type="text" id="lastName" name="lastName" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
+                                </div>
+                            </div>
+
+                            <div class="group">
+                                <label for="email" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Email">Email</label>
+                                <input type="email" id="email" name="email" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
+                            </div>
+
+                            <div class="group">
+                                <label for="bio" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Bio">Bio</label>
+                                <textarea id="bio" name="bio" rows="4" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg"></textarea>
+                            </div>
+
+                            <div class="group">
+                                <button type="button" onclick="togglePasswordFields()" class="text-red-500 hover:text-red-600 font-medium transition-colors duration-300" data-i18n="Change Password">Change Password</button>
+                                <div id="passwordFields" class="hidden space-y-4 mt-4">
+                                    <div class="relative group">
+                                        <label for="currentPassword" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Current Password">Current Password</label>
+                                        <input type="password" id="currentPassword" name="currentPassword" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
+                                    </div>
+                                    <div class="relative group">
+                                        <label for="newPassword" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="New Password">New Password</label>
+                                        <input type="password" id="newPassword" name="newPassword" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
+                                    </div>
+                                    <div class="relative group">
+                                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 group-hover:text-red-500 transition-colors" data-i18n="Confirm Password">Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" name="confirmPassword" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm transition-all duration-300 hover:border-red-300 py-3 text-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-4">
+                                <button type="submit" class="inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-300 transform hover:scale-105" data-i18n="Save Changes">Save Changes</button>
+                                <button type="button" onclick="window.location.href='index.html'" class="inline-flex justify-center py-3 px-8 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-300 transform hover:scale-105" data-i18n="Cancel">Cancel</button>
                             </div>
                         </div>
-                        <div class="space-y-2 md:col-span-2">
-                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
-                            <div class="relative">
-                                <input type="password" id="confirmPassword" minlength="8" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition duration-150">
-                                <button type="button" onclick="togglePassword('confirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-4">
-                        <button type="button" onclick="window.location.href='index.html'" class="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 transition duration-150">Cancel</button>
-                        <button type="submit" class="px-6 py-2 bg-coral-500 text-white rounded-lg hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 transition duration-150">Save Changes</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
     <script src="js/auth-interceptor.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/init.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/profile-settings.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
     <script>
         let originalData = {};
 
-        // Initialize theme from localStorage or system preference
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        // Listen for system theme changes if user hasn't set a preference
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            if (!localStorage.theme) {
-                setTheme(e.matches);
-            }
-        });
-
-        // Загрузка данных пользователя
         document.addEventListener('DOMContentLoaded', async function() {
+            const currentLang = localStorage.getItem('language') || 'ru';
+            localStorage.setItem('language', currentLang);
+            document.documentElement.lang = currentLang;
+
+            // Translations
+            const translations = {
+                ru: {
+                    "Profile Settings": "Настройки профиля",
+                    "Username": "Имя пользователя",
+                    "First Name": "Имя",
+                    "Last Name": "Фамилия",
+                    "Email": "Электронная почта",
+                    "About": "О себе",
+                    "Save Changes": "Сохранить изменения",
+                    "Cancel": "Отмена",
+                    "Allowed formats: JPG, PNG, GIF": "Разрешенные форматы: JPG, PNG, GIF",
+                    "Change Password": "Сменить пароль",
+                    "Current Password": "Текущий пароль",
+                    "New Password": "Новый пароль",
+                    "Confirm Password": "Подтвердите пароль",
+                    "Bio": "Биография"
+                },
+                en: {
+                    "Profile Settings": "Profile Settings",
+                    "Username": "Username",
+                    "First Name": "First Name",
+                    "Last Name": "Last Name",
+                    "Email": "Email",
+                    "About": "About",
+                    "Save Changes": "Save Changes",
+                    "Cancel": "Cancel",
+                    "Allowed formats: JPG, PNG, GIF": "Allowed formats: JPG, PNG, GIF",
+                    "Change Password": "Change Password",
+                    "Current Password": "Current Password",
+                    "New Password": "New Password",
+                    "Confirm Password": "Confirm Password",
+                    "Bio": "Bio"
+                }
+            };
+
+            // Apply translations
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    if (element.tagName === 'INPUT' && element.type === 'submit') {
+                        element.value = translations[currentLang][key];
+                    } else {
+                        element.textContent = translations[currentLang][key];
+                    }
+                }
+            });
+
             try {
                 const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/get_current_user/');
                 const userData = await response.json();
                 
-                // Сохраняем оригинальные данные
                 originalData = {
+                    username: userData.username || '',
                     first_name: userData.first_name || '',
                     last_name: userData.last_name || '',
-                    middle_name: userData.middle_name || '',
-                    username: userData.username || '',
                     email: userData.email || '',
                     avatar: userData.avatar || ''
                 };
                 
-                // Заполняем форму
+                document.getElementById('username').value = originalData.username;
                 document.getElementById('firstName').value = originalData.first_name;
                 document.getElementById('lastName').value = originalData.last_name;
-                document.getElementById('middleName').value = originalData.middle_name;
-                document.getElementById('nickname').value = originalData.username;
                 document.getElementById('email').value = originalData.email;
                 
                 if (originalData.avatar) {
@@ -176,109 +186,89 @@
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
+                showNotification('Error loading user data', 'error');
             }
         });
 
-        // Проверка силы пароля
-        function checkPasswordStrength(password) {
-            if (!password) {
-                document.getElementById('passwordStrength').className = 'password-strength';
-                return;
-            }
-
-            let strength = 0;
-            const checks = {
-                length: password.length >= 8,
-                lowercase: /[a-z]/.test(password),
-                uppercase: /[A-Z]/.test(password),
-                number: /\d/.test(password),
-                special: /[@$!%*?&]/.test(password)
-            };
-
-            strength = Object.values(checks).filter(Boolean).length;
-
-            const strengthBar = document.getElementById('passwordStrength');
-            strengthBar.className = 'password-strength';
-
-            if (strength <= 2) {
-                strengthBar.classList.add('weak');
-            } else if (strength <= 4) {
-                strengthBar.classList.add('medium');
-            } else {
-                strengthBar.classList.add('strong');
-            }
-        }
-
-        // Обработка изменения пароля
-        document.getElementById('newPassword').addEventListener('input', function(e) {
-            checkPasswordStrength(e.target.value);
-        });
-
-        // Обработка отправки формы
         document.getElementById('profileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData();
             let hasChanges = false;
             
-            // Получаем значения полей
-            const fields = {
-                first_name: document.getElementById('firstName').value,
-                last_name: document.getElementById('lastName').value,
-                middle_name: document.getElementById('middleName').value,
-                username: document.getElementById('nickname').value,
-                email: document.getElementById('email').value
-            };
+            const username = document.getElementById('username').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const bio = document.getElementById('bio').value;
             
-            // Проверяем, какие поля изменились
-            for (const [key, value] of Object.entries(fields)) {
-                if (value !== originalData[key]) {
-                    formData.append(key, value);
-                    hasChanges = true;
-                }
+            if (username !== originalData.username) {
+                formData.append('username', username);
+                hasChanges = true;
+            }
+            if (firstName !== originalData.first_name) {
+                formData.append('first_name', firstName);
+                hasChanges = true;
+            }
+            if (lastName !== originalData.last_name) {
+                formData.append('last_name', lastName);
+                hasChanges = true;
+            }
+            if (email !== originalData.email) {
+                formData.append('email', email);
+                hasChanges = true;
+            }
+            if (bio) {
+                formData.append('bio', bio);
+                hasChanges = true;
             }
             
-            // Проверяем пароль
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            const currentPassword = document.getElementById('currentPassword')?.value;
+            const newPassword = document.getElementById('newPassword')?.value;
+            const confirmPassword = document.getElementById('confirmPassword')?.value;
             
             if (newPassword) {
-                if (!currentPassword) {
-                    alert('Please enter your current password to change password');
-                    return;
-                }
-                
                 if (newPassword !== confirmPassword) {
                     alert('New passwords do not match');
                     return;
                 }
-                
+                if (!currentPassword) {
+                    alert('Please enter your current password');
+                    return;
+                }
                 formData.append('current_password', currentPassword);
                 formData.append('new_password', newPassword);
                 hasChanges = true;
             }
             
-            // Проверяем аватар
             const avatarInput = document.getElementById('avatar-upload');
             if (avatarInput.files.length > 0) {
                 formData.append('avatar', avatarInput.files[0]);
                 hasChanges = true;
             }
             
-            // Если нет изменений, не отправляем запрос
             if (!hasChanges) {
                 window.location.href = 'index.html';
                 return;
             }
             
             try {
-                const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/update_user_info/', {
-                    method: 'POST',
+                // Сначала получаем текущего пользователя
+                const userResponse = await fetchWithAuth('http://127.0.0.1:8000/api/users/get_current_user/');
+                if (!userResponse.ok) {
+                    throw new Error('Failed to get current user');
+                }
+                const currentUser = await userResponse.json();
+
+                // Отправляем запрос на обновление профиля
+                const response = await fetchWithAuth(`http://127.0.0.1:8000/api/users/${currentUser.id}/`, {
+                    method: 'PATCH',
                     body: formData
                 });
 
                 if (response.ok) {
+                    const updatedUser = await response.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
                     window.location.href = 'index.html';
                 } else {
                     const errorData = await response.json();
@@ -290,7 +280,6 @@
             }
         });
 
-        // Предпросмотр аватара
         document.getElementById('avatar-upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -302,34 +291,9 @@
             }
         });
 
-        // Функция переключения видимости пароля
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
-            const svg = button.querySelector('svg');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                svg.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                `;
-            } else {
-                input.type = 'password';
-                svg.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                `;
-            }
-        }
-
-        function setTheme(dark) {
-            if (dark) {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            }
+        function togglePasswordFields() {
+            const passwordFields = document.getElementById('passwordFields');
+            passwordFields.classList.toggle('hidden');
         }
     </script>
 </body>

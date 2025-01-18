@@ -1,47 +1,51 @@
-from django.urls import path, include
 from django.contrib import admin
-from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+from rest_framework import routers
 from FlowTestApp.views import (
-    TestCaseViewSet,
-    TestRunViewSet,
-    AutomationScriptViewSet,
-    LoginView,
     ProjectViewSet,
     FolderViewSet,
+    TestCaseViewSet,
+    TestRunViewSet,
     SchedulerEventViewSet,
     CustomUserViewSet,
     RoleViewSet,
-    get_user_language,
-    update_user_language
+    AutomationProjectViewSet,
+    test_cases_creation_stats,
+    test_execution_stats,
+    tests_over_time,
+    results_distribution,
+    priority_distribution,
+    check_test_existence,
 )
 from django.views.generic import RedirectView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
 from django.conf.urls.static import static
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet)
 router.register(r'folders', FolderViewSet)
 router.register(r'testcases', TestCaseViewSet)
 router.register(r'testruns', TestRunViewSet)
-router.register(r'automationscripts', AutomationScriptViewSet)
-router.register(r'scheduler', SchedulerEventViewSet)
-router.register(r'users', CustomUserViewSet)
+router.register(r'events', SchedulerEventViewSet)
+router.register(r'users', CustomUserViewSet, basename='users')
 router.register(r'roles', RoleViewSet)
-
+router.register(r'automation_projects', AutomationProjectViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(url='/api/', permanent=True)),
     path('api/', include(router.urls)),
-    path('login/', LoginView.as_view(), name='login'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/users/language/', get_user_language),
-    path('api/users/update_language/', update_user_language),
-    path('api/users/theme/', CustomUserViewSet.as_view({'post': 'update_theme'}), name='update-theme'),
-    path('api/users/update/', CustomUserViewSet.as_view({'post': 'update_user_info'}), name='user-update'),
-    path('api/users/get_current_user/', CustomUserViewSet.as_view({'get': 'get_current_user'}), name='get-current-user'),
+    
+    # Статистика
+    path('api/statistics/test_cases_creation/<int:project_id>/', test_cases_creation_stats, name='test_cases_creation_stats'),
+    path('api/statistics/test_execution/<int:project_id>/', test_execution_stats, name='test_execution_stats'),
+    path('api/statistics/tests_over_time/<int:project_id>/', tests_over_time, name='tests_over_time'),
+    path('api/statistics/results_distribution/<int:project_id>/', results_distribution, name='results_distribution'),
+    path('api/statistics/priority_distribution/<int:project_id>/', priority_distribution, name='priority_distribution'),
+    path('api/check-test-existence/<int:test_id>/', check_test_existence, name='check-test-existence'),
 ]
 
 # Добавляем обработку медиа-файлов в режиме разработки

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Repository Connection Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">Connect Repository</h2>
+            <form id="repositoryForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Repository Name</label>
+                    <input type="text" id="repoName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Repository URL</label>
+                    <input type="text" id="repoUrl" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Branch</label>
+                    <input type="text" id="branch" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" value="main" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Framework</label>
+                    <select id="framework" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="pytest">PyTest</option>
+                        <option value="unittest">UnitTest</option>
+                        <option value="robot">Robot Framework</option>
+                        <option value="playwright">Playwright</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tests Directory</label>
+                    <input type="text" id="testsDir" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="tests/" required>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Connect Repository</button>
+            </form>
+        </div>
+
+        <!-- Connected Repositories -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">Connected Repositories</h2>
+            <div id="repositoriesList" class="space-y-4">
+                <!-- Repository items will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Test Execution Panel -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">Test Execution</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Repository</label>
+                    <select id="repoSelect" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Test Selection</label>
+                    <div id="testsList" class="mt-2 space-y-2">
+                        <!-- Test checkboxes will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="runSelectedTests" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        Run Selected Tests
+                    </button>
+                    <button id="runAllTests" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Run All Tests
+                    </button>
+                    <button id="scheduleTests" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700">
+                        Schedule Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Modal -->
+        <div id="scheduleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <h3 class="text-lg font-bold mb-4 dark:text-white">Schedule Test Run</h3>
+                <form id="scheduleForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Schedule Type</label>
+                        <select id="scheduleType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
+                        <input type="time" id="scheduleTime" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div id="weekDaySelector" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Days of Week</label>
+                        <div class="flex space-x-2 mt-1">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="weekday" value="1">
+                                <span class="ml-1">Mon</span>
+                            </label>
+                            <!-- Add other days similarly -->
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancelSchedule" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/repository.js"></script>
+</body>
+</html>

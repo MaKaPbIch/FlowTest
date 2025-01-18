@@ -553,3 +553,9 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
+
+/* Custom styles */
+
+.dark {
+  color-scheme: dark;
+}

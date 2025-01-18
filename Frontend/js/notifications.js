@@ -1,36 +1,65 @@
 // Load notifications HTML
 document.addEventListener('DOMContentLoaded', function() {
+    const notificationsWrapper = document.getElementById('notifications-wrapper');
+    if (!notificationsWrapper) {
+        console.log('Notifications wrapper not found - notifications disabled');
+        return;
+    }
+
+    // Проверяем, есть ли кнопка уведомлений
+    const notificationButton = document.querySelector('[data-i18n="notifications"]');
+    if (!notificationButton) {
+        console.log('Notifications button not found, skipping notifications initialization');
+        return;
+    }
+
     fetch('notificationmini.html')
         .then(response => response.text())
         .then(html => {
-            // Create a container for notifications after the notifications button
-            const notificationButton = document.querySelector('[data-i18n="notifications"]').closest('button');
-            const container = document.createElement('div');
-            container.id = 'notificationContainer';
-            notificationButton.parentNode.insertBefore(container, notificationButton.nextSibling);
-            container.innerHTML = html;
+            try {
+                // Create a container for notifications after the notifications button
+                const button = notificationButton.closest('button');
+                if (!button) {
+                    console.log('Notifications button wrapper not found');
+                    return;
+                }
 
-            // Add click event listeners to all close buttons
-            document.querySelectorAll('[aria-label="Close notification"]').forEach(button => {
-                button.addEventListener("click", function() {
-                    this.closest('[role="alertdialog"]').remove();
-                    updateNotificationCount();
-                    updateNotificationDisplay();
+                const container = document.createElement('div');
+                container.id = 'notificationContainer';
+                button.parentNode.insertBefore(container, button.nextSibling);
+                container.innerHTML = html;
+
+                // Add click event listeners to all close buttons
+                document.querySelectorAll('[aria-label="Close notification"]').forEach(button => {
+                    button.addEventListener("click", function() {
+                        const alertDialog = this.closest('[role="alertdialog"]');
+                        if (alertDialog) {
+                            alertDialog.remove();
+                            updateNotificationCount();
+                        }
+                    });
                 });
-            });
 
-            loadNotifications();
+                loadNotifications();
 
-            // Add click handlers for close buttons
-            document.querySelectorAll('[role="alertdialog"] button').forEach(button => {
-                button.addEventListener('click', () => closeNotification(button));
-            });
+                // Add click handlers for close buttons
+                document.querySelectorAll('[role="alertdialog"] button').forEach(button => {
+                    button.addEventListener('click', () => closeNotification(button));
+                });
+            } catch (error) {
+                console.error('Error initializing notifications:', error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading notifications template:', error);
         });
 });
 
 function toggleNotifications() {
     const notificationList = document.getElementById("notificationList");
-    notificationList.classList.toggle("hidden");
+    if (notificationList) {
+        notificationList.classList.toggle("hidden");
+    }
 }
 
 function markAllAsRead() {
@@ -44,6 +73,8 @@ function markAllAsRead() {
 
 function clearAll() {
     const notificationItems = document.getElementById("notificationItems");
+    if (!notificationItems) return;
+
     notificationItems.innerHTML = `
         <!-- Empty state message -->
         <div id="emptyNotifications" class="text-center py-8">
@@ -57,27 +88,26 @@ function clearAll() {
     updateNotificationCount();
 }
 
-function clearAllNotifications() {
-    const notificationItems = document.getElementById('notificationItems');
-    const notifications = notificationItems.querySelectorAll('[role="alertdialog"]');
-    notifications.forEach(notification => notification.remove());
-    updateNotificationDisplay();
-}
-
 function updateNotificationCount() {
     const count = document.querySelectorAll("[role='alertdialog']").length;
     const indicator = document.querySelector('.absolute.top-0.right-0');
     if (indicator) {
         if (count > 0) {
             indicator.classList.remove('hidden');
+            indicator.textContent = count;
         } else {
             indicator.classList.add('hidden');
         }
     }
+    updateNotificationDisplay();
 }
 
 function loadNotifications() {
+    const container = document.getElementById('notificationContainer');
+    if (!container) return;
+
     const notificationItems = document.getElementById("notificationItems");
+    if (!notificationItems) return;
     
     // Очищаем контейнер
     notificationItems.innerHTML = `
@@ -89,7 +119,6 @@ function loadNotifications() {
             <p class="text-gray-500 text-sm" data-i18n="noNotifications">No notifications yet</p>
             <p class="text-gray-400 text-xs mt-1" data-i18n="checkBackLater">Check back later for updates</p>
         </div>
-        
         <!-- Sample notifications -->
         <div class="bg-white rounded-lg shadow-[0_2px_10px_rgba(255,127,80,0.2)] p-4 transform transition-all duration-300 hover:scale-102 border-l-4 border-[#FF6347]" role="alertdialog">
             <div class="flex justify-between items-start">
@@ -105,40 +134,45 @@ function loadNotifications() {
             </div>
         </div>
     `;
-
     updateNotificationDisplay();
 }
 
 function updateNotificationDisplay() {
     const notificationItems = document.getElementById('notificationItems');
     const emptyNotifications = document.getElementById('emptyNotifications');
-    const notifications = notificationItems.querySelectorAll('[role="alertdialog"]');
     
-    // Показываем/скрываем сообщение о пустом состоянии
-    if (notifications.length === 0) {
-        if (emptyNotifications) {
-            emptyNotifications.style.display = 'block';
-        }
+    if (!notificationItems || !emptyNotifications) return;
+
+    const hasNotifications = notificationItems.querySelectorAll('[role="alertdialog"]').length > 0;
+    
+    if (hasNotifications) {
+        emptyNotifications.classList.add('hidden');
     } else {
-        if (emptyNotifications) {
-            emptyNotifications.style.display = 'none';
-        }
+        emptyNotifications.classList.remove('hidden');
     }
+    
+    updateNotificationCount();
 }
 
 function closeNotification(button) {
     const notification = button.closest('[role="alertdialog"]');
-    notification.remove();
-    updateNotificationDisplay();
-    updateNotificationCount();
+    if (notification) {
+        notification.remove();
+        updateNotificationCount();
+    }
 }
 
 // Close notifications when clicking outside
 document.addEventListener('click', function(event) {
     const notificationList = document.getElementById('notificationList');
-    const notificationButton = document.querySelector('[data-i18n="notifications"]').closest('button');
+    const notificationButton = document.querySelector('[data-i18n="notifications"]');
     
-    if (notificationList && !notificationList.contains(event.target) && !notificationButton.contains(event.target)) {
+    if (!notificationList || !notificationButton) return;
+    
+    const button = notificationButton.closest('button');
+    if (!button) return;
+
+    if (!notificationList.contains(event.target) && !button.contains(event.target)) {
         notificationList.classList.add('hidden');
     }
 });

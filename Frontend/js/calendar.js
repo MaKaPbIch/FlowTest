@@ -1,110 +1,196 @@
-let currentDate = new Date();
-let currentMonth = currentDate.getMonth();
-let currentYear = currentDate.getFullYear();
+// Объект для управления календарем
+window.Calendar = {
+    currentMonth: new Date().getMonth(),
+    currentYear: new Date().getFullYear(),
+    selectedDate: null,
+    events: {},
 
-// Load calendar HTML
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('calendarmini.html')
-        .then(response => response.text())
-        .then(html => {
-            // Create a container for the calendar after the calendar button
-            const calendarButton = document.querySelector('[aria-label="Schedule new event"]');
-            const container = document.createElement('div');
-            container.id = 'calendarContainer';
-            calendarButton.parentNode.insertBefore(container, calendarButton.nextSibling);
-            container.innerHTML = html;
+    updateCalendarHeader() {
+        const monthNames = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ];
+        
+        const headerMonth = document.querySelector('.calendar-current-month');
+        if (headerMonth) {
+            headerMonth.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
+        }
+    },
+
+    previousMonth() {
+        this.currentMonth--;
+        if (this.currentMonth < 0) {
+            this.currentMonth = 11;
+            this.currentYear--;
+        }
+        this.updateCalendarHeader();
+        this.renderCalendar();
+    },
+
+    nextMonth() {
+        this.currentMonth++;
+        if (this.currentMonth > 11) {
+            this.currentMonth = 0;
+            this.currentYear++;
+        }
+        this.updateCalendarHeader();
+        this.renderCalendar();
+    },
+
+    renderCalendar(date = new Date()) {
+        const calendar = document.querySelector('.calendar-days');
+        if (!calendar) return;
+
+        // Clear existing calendar
+        calendar.innerHTML = '';
+
+        // Get first day of month and last day of month
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        // Get the day of week for the first day (0-6)
+        const firstDayIndex = firstDay.getDay();
+
+        // Create array of days
+        const days = [];
+        
+        // Add previous month's days
+        for (let i = firstDayIndex; i > 0; i--) {
+            const prevDate = new Date(firstDay);
+            prevDate.setDate(prevDate.getDate() - i);
+            days.push({
+                date: prevDate,
+                isCurrentMonth: false
+            });
+        }
+
+        // Add current month's days
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+            const currentDate = new Date(date.getFullYear(), date.getMonth(), i);
+            days.push({
+                date: currentDate,
+                isCurrentMonth: true
+            });
+        }
+
+        // Add next month's days to complete the grid
+        const remainingDays = 42 - days.length; // 6 rows × 7 days = 42
+        for (let i = 1; i <= remainingDays; i++) {
+            const nextDate = new Date(lastDay);
+            nextDate.setDate(nextDate.getDate() + i);
+            days.push({
+                date: nextDate,
+                isCurrentMonth: false
+            });
+        }
+
+        // Render days
+        days.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.classList.add('calendar-day');
             
-            // Initialize calendar
-            updateCalendar();
+            if (!day.isCurrentMonth) {
+                dayElement.classList.add('other-month');
+            }
+            
+            if (day.date.toDateString() === new Date().toDateString()) {
+                dayElement.classList.add('today');
+            }
+
+            const dateString = `${day.date.getFullYear()}-${String(day.date.getMonth() + 1).padStart(2, '0')}-${String(day.date.getDate()).padStart(2, '0')}`;
+            const hasEvents = this.events[dateString] && this.events[dateString].length > 0;
+
+            if (hasEvents) {
+                const eventDot = document.createElement('div');
+                eventDot.className = 'absolute bottom-1 left-1/2 transform -translate-x-1/2';
+                if (this.events[dateString].length > 1) {
+                    eventDot.innerHTML = `<div class="flex gap-1">${this.events[dateString].slice(0, 3).map(event => 
+                        `<div class="w-2 h-2 rounded-full" style="background-color: ${event.color}"></div>`
+                    ).join('')}</div>`;
+                } else {
+                    eventDot.innerHTML = `<div class="w-2 h-2 rounded-full" style="background-color: ${this.events[dateString][0].color}"></div>`;
+                }
+                dayElement.appendChild(eventDot);
+            }
+
+            dayElement.textContent = day.date.getDate();
+            dayElement.addEventListener('click', () => this.selectDate(day.date.getFullYear(), day.date.getMonth(), day.date.getDate()));
+            calendar.appendChild(dayElement);
         });
-});
+    },
 
-function updateCalendar() {
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
-    document.getElementById("monthDisplay").textContent = `${monthNames[currentMonth]} ${currentYear}`;
-    renderCalendar();
-}
+    selectDate(year, month, day) {
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        document.getElementById('selectedDateDisplay').textContent = new Date(dateString).toLocaleDateString();
+        document.getElementById('eventDate').value = dateString;
 
-function previousMonth() {
-    currentMonth--;
-    if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
+        if (this.events[dateString] && this.events[dateString].length > 0) {
+            this.showEventsModal(dateString);
+        }
+    },
+
+    showEventsModal(dateString) {
+        const modal = document.getElementById('eventsModal');
+        const eventsList = document.getElementById('eventsList');
+        const modalDate = document.getElementById('modalDate');
+        
+        modalDate.textContent = new Date(dateString).toLocaleDateString();
+        eventsList.innerHTML = '';
+
+        this.events[dateString].forEach(event => {
+            const eventElement = document.createElement('div');
+            eventElement.className = 'p-4 rounded-lg border border-gray-200';
+            eventElement.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full" style="background-color: ${event.color}"></div>
+                    <h4 class="font-semibold">${event.title}</h4>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">${event.time}</p>
+                <p class="text-sm text-gray-600 mt-1">Reminder: ${event.reminder}</p>
+                <p class="text-sm mt-2">${event.description}</p>
+            `;
+            eventsList.appendChild(eventElement);
+        });
+
+        modal.classList.remove('hidden');
+    },
+
+    closeModal() {
+        document.getElementById('eventsModal').classList.add('hidden');
+    },
+
+    init() {
+        this.updateCalendarHeader();
+        this.renderCalendar();
+        
+        // Добавляем обработчики для кнопок
+        document.querySelector('.prev-month')?.addEventListener('click', () => this.previousMonth());
+        document.querySelector('.next-month')?.addEventListener('click', () => this.nextMonth());
+        
+        // Обработчик для формы добавления события
+        document.getElementById('eventForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('eventDate').value;
+            const event = {
+                title: document.getElementById('eventTitle').value,
+                time: document.getElementById('eventTime').value,
+                category: document.getElementById('eventCategory').value,
+                reminder: document.getElementById('eventReminder').value,
+                color: document.getElementById('eventColor').value,
+                description: document.getElementById('eventDescription').value
+            };
+
+            if (!this.events[date]) {
+                this.events[date] = [];
+            }
+            this.events[date].push(event);
+            this.renderCalendar(new Date(date));
+            this.showEventsModal(date);
+            e.target.reset();
+            document.getElementById('selectedDateDisplay').textContent = 'No date selected';
+        });
     }
-    updateCalendar();
-}
+};
 
-function nextMonth() {
-    currentMonth++;
-    if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-    }
-    updateCalendar();
-}
-
-function openModal(date) {
-    document.getElementById("selectedDate").textContent = `${date} ${monthNames[currentMonth]} ${currentYear}`;
-    document.getElementById("eventModal").classList.remove("hidden");
-}
-
-function closeModal() {
-    document.getElementById("eventModal").classList.add("hidden");
-}
-
-function toggleCalendar() {
-    const popup = document.getElementById('calendarPopup');
-    popup.classList.toggle('hidden');
-    updateCalendar();
-}
-
-function renderCalendar() {
-    const daysContainer = document.getElementById('calendarDays');
-    if (!daysContainer) return;
-    
-    daysContainer.innerHTML = '';
-
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    const startPadding = firstDay.getDay();
-
-    // Add padding for previous month
-    for (let i = 0; i < startPadding; i++) {
-        const prevDate = new Date(currentYear, currentMonth, 0 - (startPadding - i - 1));
-        addDayToCalendar(daysContainer, prevDate.getDate(), true);
-    }
-
-    // Add current month days
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-        addDayToCalendar(daysContainer, i, false);
-    }
-
-    // Add padding for next month
-    const endPadding = 42 - (startPadding + lastDay.getDate()); // 42 = 6 rows * 7 days
-    for (let i = 1; i <= endPadding; i++) {
-        addDayToCalendar(daysContainer, i, true);
-    }
-}
-
-function addDayToCalendar(container, day, isOtherMonth) {
-    const button = document.createElement('button');
-    button.className = `aspect-square p-2 rounded-lg ${isOtherMonth ? 'text-gray-400' : ''} hover:bg-gray-50 transition focus:ring-2 focus:ring-[#ff6b6b] focus:outline-none`;
-    button.onclick = () => openModal(day);
-    
-    const span = document.createElement('span');
-    span.textContent = day;
-    button.appendChild(span);
-    
-    container.appendChild(button);
-}
-
-// Close calendar when clicking outside
-document.addEventListener('click', function(event) {
-    const popup = document.getElementById('calendarPopup');
-    const button = document.querySelector('[aria-label="Schedule new event"]');
-    
-    if (popup && !popup.contains(event.target) && !button.contains(event.target)) {
-        popup.classList.add('hidden');
-    }
-});
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => window.Calendar.init());

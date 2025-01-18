@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="events">Event Calendar</title>
+    <script src="js/theme-preloader.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,36 +22,43 @@
             },
         }
     </script>
+    <link rel="stylesheet" href="css/calendar.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/calendar.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="js/settings.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen overflow-y-auto">
-            <div class="p-4 sticky top-0">
-                <img src="images/FlowTest.png" alt="Company Logo" class="h-8 w-auto mb-8">
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen sticky top-0">
+            <div class="p-4">
+                <a href="index.html">
+                    <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8">
+                </a>
                 <nav class="space-y-2">
                     <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
-                        Dashboard
+                        <span data-i18n="dashboard">Dashboard</span>
                     </a>
                     <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                         <span data-i18n="testCases">Test Cases</span>
                     </a>
                     <a href="#" class="flex items-center p-2 text-coral-600 dark:text-coral-400 rounded-lg bg-coral-50 dark:bg-gray-700 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <span data-i18n="events">Event Calendar</span>
+                        <span data-i18n="event_calendar">Event Calendar</span>
                     </a>
                     <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <span data-i18n="testRuns">Test Runs</span>
@@ -61,19 +69,113 @@
 
         <!-- Main Content -->
         <div class="flex-1">
-            <!-- Ваш существующий код календаря -->
-            <div class="flex max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-6">
-                <!-- Остальной код календаря -->
+            <div class="flex max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-6 h-full">
+                <!-- Calendar Section -->
+                <div class="flex-grow h-full">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-full flex flex-col">
+                        <div class="calendar">
+                            <div class="calendar-header">
+                                <button class="calendar-nav-btn" onclick="previousMonth()">&lt;</button>
+                                <h2 class="calendar-current-month"></h2>
+                                <button class="calendar-nav-btn" onclick="nextMonth()">&gt;</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div>Вс</div>
+                                <div>Пн</div>
+                                <div>Вт</div>
+                                <div>Ср</div>
+                                <div>Чт</div>
+                                <div>Пт</div>
+                                <div>Сб</div>
+                            </div>
+                            <div class="calendar-days"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Event Form -->
+                <div class="w-96 bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-fit sticky top-8" id="eventFormContainer">
+                    <div class="mt-4">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white" data-i18n="add_event">Add Event</h3>
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="selected_date">Selected Date: <span id="selectedDate" data-i18n="no_date_selected">No date selected</span></p>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="title">Title</label>
+                                <input type="text" id="eventTitle" data-i18n-placeholder="enter_event_title" placeholder="Enter event title" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="time">Time</label>
+                                <input type="time" id="eventTime" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="category">Category</label>
+                                <select id="eventCategory" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                                    <option value="reminder" data-i18n="reminder">Reminder</option>
+                                    <option value="test_run" data-i18n="test_run">Test Run</option>
+                                </select>
+                            </div>
+                            <div id="testRunFields" class="space-y-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="repeat_period">Repeat Period</label>
+                                    <select id="repeatPeriod" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                                        <option value="daily" data-i18n="daily">Daily</option>
+                                        <option value="weekly" data-i18n="weekly">Weekly</option>
+                                        <option value="monthly" data-i18n="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="skip_weekends">Skip Weekends</label>
+                                    <input type="checkbox" id="skipWeekends" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-coral-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="event_color">Event Color</label>
+                                <input type="color" id="eventColor" value="#FF7F50">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
+                                <textarea id="eventDescription" data-i18n-placeholder="enter_event_description" placeholder="Enter event description" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm"></textarea>
+                            </div>
+                            <button type="submit" data-i18n="save_event" class="w-full bg-coral-500 text-white py-2 px-4 rounded-md hover:bg-coral-600">Save Event</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Events Modal -->
+    <div id="eventsModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200" id="modalDate"></h3>
+                <button onclick="closeModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="eventsList" class="space-y-4"></div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/auth-interceptor.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/theme.js"></script>
     <script src="js/i18n.js"></script>
-    <script src="js/calendar.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <script>
+        // Ждем загрузки i18n
+        document.addEventListener('DOMContentLoaded', () => {
+            // Инициализируем i18n
+            window.i18n.init().then(() => {
+                // После загрузки переводов загружаем календарь
+                const calendarScript = document.createElement('script');
+                calendarScript.src = 'js/calendar.js';
+                document.body.appendChild(calendarScript);
+            });
+        });
+    </script>
+    <button onclick="toggleTheme()">Переключить тему</button>
 </body>
-</html> 
+</html>

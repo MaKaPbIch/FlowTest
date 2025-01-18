@@ -85,94 +85,197 @@ async function fetchProjects() {
         const projects = await response.json();
         console.log('Получены проекты:', projects);
         updateProjectSelect(projects);
+        updateProjectsList(projects);
     } catch (error) {
         console.error('Ошибка при получении проектов:', error);
         // Не перенаправляем здесь на логин, так как это уже обрабатывается в fetchWithAuth
     }
 }
 
-function updateProjectSelect(projects) {
-    console.log('Обновляем select элемент...');
-    const selectElement = document.getElementById('projectSelector');
-    console.log('Найден select элемент:', selectElement);
+function updateProjectsList(projects) {
+    const projectsList = document.getElementById('projects-list');
+    if (!projectsList) return;
+
+    projectsList.innerHTML = '';
     
-    if (!selectElement) {
-        console.error('Select element not found');
+    if (projects.length === 0) {
+        projectsList.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+                <p>${window.i18n.t('noProjects')}</p>
+            </div>
+        `;
         return;
     }
 
-    // Сохраняем текущее выбранное значение
-    const currentValue = selectElement.value;
-
-    // Очищаем текущие опции, оставляя только первую (Все проекты)
-    while (selectElement.options.length > 1) {
-        selectElement.remove(1);
-    }
-
-    // Добавляем новые опции
     projects.forEach(project => {
-        const option = document.createElement('option');
-        option.value = project.id;
-        option.textContent = project.name;
-        selectElement.appendChild(option);
+        const projectCard = document.createElement('div');
+        projectCard.className = 'bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow';
+        projectCard.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">${project.name}</h3>
+                    <p class="text-sm text-gray-500">${project.description || ''}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="text-blue-600 hover:text-blue-800" onclick="editProject(${project.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="text-red-600 hover:text-red-800" onclick="deleteProject(${project.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between text-sm text-gray-500">
+                <span>${project.test_cases_count || 0} tests</span>
+                <span>Created: ${new Date(project.created_at).toLocaleDateString()}</span>
+            </div>
+        `;
+        projectsList.appendChild(projectCard);
     });
-
-    // Восстанавливаем выбранное значение, если оно существует в новом списке
-    if (currentValue && Array.from(selectElement.options).some(opt => opt.value === currentValue)) {
-        selectElement.value = currentValue;
-    }
-
-    // Вызываем событие change для обновления отображения
-    selectElement.dispatchEvent(new Event('change'));
 }
 
-// Инициализация обработчика событий
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM загружен, начинаем инициализацию...');
-    fetchProjects();
+async function fetchProjects() {
+    try {
+        const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const projects = await response.json();
+        updateProjectSelect(projects);
+        return projects;
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+    }
+}
 
-    // Добавляем обработчик изменения выбранного проекта
-    const projectSelector = document.getElementById('projectSelector');
-    if (projectSelector) {
-        projectSelector.addEventListener('change', async (event) => {
-            const selectedProjectId = event.target.value;
-            
-            // Сохраняем выбранный проект в localStorage
-            if (selectedProjectId) {
-                localStorage.setItem('selectedProjectId', selectedProjectId);
-                // Генерируем событие для других страниц
-                window.dispatchEvent(new Event('storage'));
-            } else {
-                localStorage.removeItem('selectedProjectId');
-            }
+function updateProjectSelect(projects) {
+    const selectElement = document.getElementById('projectSelector');
+    if (!selectElement) {
+        console.error('Project selector not found');
+        return;
+    }
 
-            try {
-                // Получаем все проекты
-                const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const projects = await response.json();
-                
-                // Фильтруем проекты если выбран конкретный проект
-                const filteredProjects = selectedProjectId 
-                    ? projects.filter(project => project.id.toString() === selectedProjectId)
-                    : projects;
-                
-                // Обновляем отображение проектов
-                updateProjectDisplay(filteredProjects);
-            } catch (error) {
-                console.error('Ошибка при обновлении проектов:', error);
-            }
+    selectElement.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = window.i18n.t('selectProject');
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    selectElement.appendChild(defaultOption);
+
+    if (Array.isArray(projects) && projects.length > 0) {
+        projects.forEach(project => {
+            const option = document.createElement('option');
+            option.value = project.id;
+            option.textContent = project.name;
+            selectElement.appendChild(option);
         });
     }
-});
 
-// Функция для обновления отображения проектов
-function updateProjectDisplay(projects) {
-    // Здесь добавьте код для обновления отображения проектов на странице
-    // Например, обновление графиков, таблиц или других элементов
-    console.log('Обновление отображения проектов:', projects);
+    // Восстанавливаем выбранный проект
+    const savedProject = localStorage.getItem('selectedProject');
+    if (savedProject) {
+        selectElement.value = savedProject;
+    }
+
+    selectElement.addEventListener('change', function() {
+        if (this.value) {
+            localStorage.setItem('selectedProject', this.value);
+            // Обновляем графики при смене проекта
+            if (window.dashboardManager) {
+                window.dashboardManager.updateCharts();
+            }
+        }
+    });
 }
+
+async function createProject(event) {
+    event.preventDefault();
+    
+    const projectNameInput = document.getElementById('projectName');
+    const projectDescriptionInput = document.getElementById('projectDescription');
+    const createProjectModal = document.getElementById('createProjectModal');
+    
+    const projectData = {
+        name: projectNameInput.value.trim(),
+        description: projectDescriptionInput.value.trim()
+    };
+
+    try {
+        const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/', {
+            method: 'POST',
+            body: JSON.stringify(projectData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create project');
+        }
+
+        const newProject = await response.json();
+        
+        // Показываем уведомление об успехе
+        showNotification(
+            window.i18n.t('projectCreated'),
+            'success'
+        );
+
+        // Закрываем модальное окно
+        createProjectModal.classList.add('hidden');
+        
+        // Очищаем форму
+        projectNameInput.value = '';
+        projectDescriptionInput.value = '';
+
+        // Обновляем список проектов
+        await fetchProjects();
+
+    } catch (error) {
+        console.error('Error creating project:', error);
+        showNotification(
+            window.i18n.t('projectCreationError'),
+            'error'
+        );
+    }
+}
+
+// Функция для показа уведомлений
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white min-w-[300px] z-50`;
+    
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Удаляем уведомление через 3 секунды
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+async function loadProjects() {
+    const projectsContainer = document.getElementById('projects-container');
+    if (projectsContainer) {
+        projectsContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading projects...</div>';
+    }
+    
+    await fetchProjects();
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+    
+    // Привязываем обработчик к форме создания проекта
+    const createProjectForm = document.getElementById('createProjectForm');
+    if (createProjectForm) {
+        createProjectForm.addEventListener('submit', createProject);
+    }
+});
 
 console.log('projects.js загружен');

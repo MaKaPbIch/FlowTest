@@ -1,0 +1,65 @@
+INFO 2025-01-18 23:13:31,603 autoreload 16696 20820 Watching for file changes with StatReloader
+INFO 2025-01-18 23:13:58,449 basehttp 16696 20716 "POST /api/token/ HTTP/1.1" 200 483
+INFO 2025-01-18 23:13:59,188 basehttp 16696 20716 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:13:59,331 basehttp 16696 10912 "GET /api/projects/ HTTP/1.1" 200 1938
+INFO 2025-01-18 23:13:59,673 basehttp 16696 19124 "GET /media/avatars/1.png HTTP/1.1" 200 890861
+INFO 2025-01-18 23:14:00,613 basehttp 16696 10912 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:14:00,620 basehttp 16696 20716 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:14:00,703 basehttp 16696 20716 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:14:02,205 basehttp 16696 20716 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:14:02,285 basehttp 16696 20716 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:14:08,786 basehttp 16696 20716 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:14:08,906 basehttp 16696 20716 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72
+INFO 2025-01-18 23:14:46,426 basehttp 16696 20716 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:14:46,449 basehttp 16696 10912 "GET /api/projects/ HTTP/1.1" 200 1938
+INFO 2025-01-18 23:14:46,544 basehttp 16696 10912 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:14:46,549 basehttp 16696 20716 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:14:46,811 basehttp 16696 20716 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:15:27,180 basehttp 16696 20716 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:15:27,266 basehttp 16696 20716 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:15:29,565 basehttp 16696 20716 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:15:29,627 basehttp 16696 20716 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72
+INFO 2025-01-18 23:17:26,661 basehttp 16696 20716 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:17:26,664 basehttp 16696 10912 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:17:26,762 basehttp 16696 10912 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:17:28,159 basehttp 16696 10912 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:17:28,242 basehttp 16696 10912 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:17:33,039 basehttp 16696 10912 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:17:33,115 basehttp 16696 10912 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72
+INFO 2025-01-18 23:18:10,953 basehttp 16696 10912 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:18:10,999 basehttp 16696 20716 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:18:11,081 basehttp 16696 21332 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:18:11,112 basehttp 16696 20716 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:18:11,157 basehttp 16696 16772 "GET /api/projects/ HTTP/1.1" 200 1938
+INFO 2025-01-18 23:19:08,797 autoreload 19528 18624 Watching for file changes with StatReloader
+INFO 2025-01-18 23:20:03,624 basehttp 19528 21948 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:20:03,703 basehttp 19528 21948 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:20:05,373 basehttp 19528 21948 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:20:05,487 basehttp 19528 21948 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72
+INFO 2025-01-18 23:21:41,574 autoreload 11404 14036 Watching for file changes with StatReloader
+INFO 2025-01-18 23:21:55,623 basehttp 11404 18732 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:21:55,632 basehttp 11404 21128 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:21:55,711 basehttp 11404 21128 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:21:57,925 basehttp 11404 21128 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:21:58,002 basehttp 11404 21128 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:21:59,556 basehttp 11404 21128 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:21:59,671 basehttp 11404 21128 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72
+INFO 2025-01-18 23:22:41,308 basehttp 11404 21128 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:22:41,325 basehttp 11404 18732 "GET /api/projects/ HTTP/1.1" 200 1938
+INFO 2025-01-18 23:22:41,442 basehttp 11404 18732 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:22:41,448 basehttp 11404 21128 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:22:41,613 basehttp 11404 21128 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:23:33,383 autoreload 11404 14036 D:\FlowTest\FlowTestApp\tasks.py changed, reloading.
+INFO 2025-01-18 23:23:34,843 autoreload 7384 20452 Watching for file changes with StatReloader
+INFO 2025-01-18 23:24:12,213 basehttp 7384 20312 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:24:12,221 basehttp 7384 22032 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:24:12,300 basehttp 7384 22032 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:24:13,899 basehttp 7384 22032 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:24:13,973 basehttp 7384 22032 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:24:18,853 basehttp 7384 22032 "GET /api/users/get_current_user/ HTTP/1.1" 200 170
+INFO 2025-01-18 23:24:18,857 basehttp 7384 20312 "GET /api/folders/?project=1 HTTP/1.1" 200 2702
+INFO 2025-01-18 23:24:18,936 basehttp 7384 20312 "GET /api/testcases/?project=1 HTTP/1.1" 200 6570
+INFO 2025-01-18 23:24:21,274 basehttp 7384 20312 "GET /api/testcases/14/ HTTP/1.1" 200 908
+INFO 2025-01-18 23:24:21,353 basehttp 7384 20312 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:24:23,069 basehttp 7384 20312 "GET /api/check-test-existence/14/ HTTP/1.1" 200 31
+INFO 2025-01-18 23:24:23,180 basehttp 7384 20312 "POST /api/testcases/14/execute/ HTTP/1.1" 200 72

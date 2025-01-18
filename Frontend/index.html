@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="dashboard">Test Management Dashboard</title>
+    <script src="js/theme-preloader.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/settings.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/calendarmini.js"></script>
+    <script src="js/menu.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -30,90 +35,139 @@
             },
         }
     </script>
-    <script src="js/auth-interceptor.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/calendar.js"></script>
+    <style>
+        .calendar-day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border-radius: 50%;
+        }
+        
+        .calendar-day.today {
+            background-color: #FF7F50;
+            color: white;
+        }
+        
+        .calendar-day:not(.today):hover {
+            background-color: #FFE4E1;
+            cursor: pointer;
+        }
+        
+        .dark .calendar-day:not(.today):hover {
+            background-color: #FF6347;
+            color: white;
+        }
+        
+        .dark .calendar-day {
+            color: #E5E7EB;
+        }
+
+        #calendarDays {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(40px, 1fr));
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .calendar-widget {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen overflow-y-auto">
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen sticky top-0">
             <div class="p-4 sticky top-0">
-                <img src="images/FlowTest.png" alt="Company Logo" class="h-8 w-auto mb-8">
+                <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8" data-i18n="companyLogo">
                 <nav class="space-y-2">
-                    <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                    <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
-                        Dashboard
+                        <span data-i18n="dashboard"></span>
                     </a>
+
                     <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <span data-i18n="testCases">Test Cases</span>
+                        <span data-i18n="testCases"></span>
                     </a>
+
                     <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2"></path>
                         </svg>
-                        <span data-i18n="events">Event Calendar</span>
+                        <span data-i18n="events"></span>
                     </a>
-                    <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+
+                    <a href="reports.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        <span data-i18n="testRuns">Test Runs</span>
+                        <span data-i18n="reports"></span>
                     </a>
                 </nav>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 bg-gray-50 dark:bg-gray-900">
             <!-- Header -->
             <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between p-4">
                     <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="dashboard">Dashboard</h1>
                     <div class="flex items-center space-x-4 ml-auto">
                         <!-- Project Selector -->
-                        <div class="w-48">
-                            <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
-                                <option value="" selected>Все проекты</option>
-                            </select>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-48">
+                                <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                    <option value="" selected data-i18n="allProjects"></option>
+                                </select>
+                            </div>
+                            <!-- Create Project Button -->
+                            <button onclick="document.getElementById('createProjectModal').classList.remove('hidden')" class="p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400 focus:outline-none focus:ring-2 focus:ring-coral-500 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
                         </div>
+
                         <!-- Calendar Button -->
-                        <button aria-label="Schedule new event" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-600 active:scale-95 group-hover:rotate-3" onclick="toggleCalendar()" data-tooltip="Click to add new event">
+                        <button id="calendarButton" aria-label="Schedule new event" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-600 active:scale-95 group-hover:rotate-3" data-tooltip="Click to add new event">
                             <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2"></path>
                             </svg>
                         </button>
+
                         <!-- Notifications -->
-                        <button onclick="toggleNotifications()" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center relative">
-                            <span class="sr-only" data-i18n="notifications">Notifications</span>
-                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400" onclick="toggleNotifications()">
+                            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                             </svg>
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            <span class="sr-only" data-i18n="notifications">Notifications</span>
                         </button>
                         <!-- User Menu -->
-                        <div class="relative z-50">
-                            <button id="userMenuButton" class="flex items-center space-x-3">
-                                <img id="userAvatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" alt="User avatar" class="w-10 h-10 rounded-full">
-                                <span id="userName" class="text-sm font-medium text-gray-700 dark:text-gray-200" data-i18n="username">John Doe</span>
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
+                                </div>
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
                             </button>
-                            <!-- User Dropdown Menu -->
-                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md py-1 shadow-lg z-50">
-                                <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
-                                <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
-                                <div class="border-t border-gray-100 dark:border-gray-700"></div>
-                                <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" data-i18n="logout">Logout</a>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div id="notification-root" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg py-4 z-50"></div>
                     </div>
                 </div>
@@ -121,147 +175,164 @@
 
             <!-- Main content -->
             <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4">
-                    <!-- Test Case Execution Chart -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Test Case Execution</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="totalTests">Total Tests</h3>
+                        <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">1,234</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="fromLastMonth">from last month</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="successRate">Success Rate</h3>
+                        <p class="text-3xl font-bold text-green-600 dark:text-green-400">85%</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">+5% from last month</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="failedTests">Failed Tests</h3>
+                        <p class="text-3xl font-bold text-red-600 dark:text-red-400">185</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">-3% from last month</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testsOverTime">Total Tests Over Time</h2>
+                        <div class="h-64">
+                            <canvas id="testsOverTime"></canvas>
+                        </div>
                     </div>
 
-                    <!-- Bug Distribution -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Bug Distribution</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="resultsDistribution">Test Results Distribution</h2>
+                        <div class="h-64">
+                            <canvas id="resultsDistribution"></canvas>
+                        </div>
                     </div>
 
-                    <!-- Regression Test Runs -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Regression Test Runs</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="executionTime">Test Execution Time</h2>
+                        <div class="h-64">
+                            <canvas id="executionTime"></canvas>
+                        </div>
                     </div>
 
-                    <!-- Tester Efficiency -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Tester Efficiency</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="priorityDistribution">Test Priority Distribution</h2>
+                        <div class="h-64">
+                            <canvas id="priorityDistribution"></canvas>
+                        </div>
                     </div>
 
-                    <!-- Test Status Distribution -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Test Status Distribution</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
-                    </div>
-
-                    <!-- Frequently Failing Tests -->
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Frequently Failing Tests</h3>
-                        <div class="h-64 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md md:col-span-2">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="categoryStatistics">Test Categories Statistics</h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="category">Category</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="totalTests">Total Tests</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="successRate">Success Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="failureRate">Failure Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="avgDuration">Avg. Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="functional">Functional</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">450</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">70%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">30%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">2.5m</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="nonFunctional">Non-Functional</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">300</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">30%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">70%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">4.2m</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="integration">Integration</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">280</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">85%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">15%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">3.8m</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="security">Security</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">204</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">92%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">8%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">5.1m</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
-    <script src="js/projects.js"></script>
-    <script src="js/menu.js"></script>
+
+    <!-- Scripts -->
     <script src="js/translations.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/notifications.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/i18n.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/projects.js"></script>
     <script src="js/init.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Проверяем срок действия сессии
-            const sessionExpires = sessionStorage.getItem('session_expires');
-            if (sessionExpires && Date.now() > parseInt(sessionExpires)) {
-                console.log('Session expired, clearing tokens...');
-                localStorage.removeItem('access');
-                localStorage.removeItem('refresh');
-                window.location.href = '/login.html';
-                return;
-            }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
-            console.log('Checking authentication...');
-            const access = localStorage.getItem('access');
-            const refresh = localStorage.getItem('refresh');
-            
-            if (!access && !refresh) {
-                console.log('No tokens found, redirecting to login...');
-                window.location.href = '/login.html';
-                return;
-            }
+    <!-- Create Project Modal -->
+    <div id="createProjectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" role="dialog" aria-modal="true">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white dark:bg-gray-800">
+            <div class="flex flex-col">
+                <div class="flex justify-between items-center pb-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100" data-i18n="createNewProject">Create New Project</h3>
+                    <button onclick="document.getElementById('createProjectModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
 
-            if (!access && refresh) {
-                console.log('Attempting to refresh token...');
-                try {
-                    const newToken = await refreshToken();
-                    if (!newToken) {
-                        throw new Error('Failed to refresh token');
-                    }
-                } catch (error) {
-                    console.error('Token refresh failed:', error);
-                    localStorage.removeItem('access');
-                    localStorage.removeItem('refresh');
-                    window.location.href = '/login.html';
-                    return;
-                }
-            }
-            
-            console.log('Authentication check passed');
-            loadUserData();
-            initializeUserMenu();
-        });
+                <form class="space-y-4">
+                    <div>
+                        <label for="projectName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="projectName">Project Name</label>
+                        <input type="text" id="projectName" name="projectName" required 
+                               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 
+                                      shadow-sm focus:border-coral-500 focus:ring-coral-500 
+                                      dark:bg-gray-700 dark:text-white sm:text-sm" 
+                               data-i18n-placeholder="enterProjectName">
+                    </div>
 
-        async function loadUserData() {
-            try {
-                const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/get_current_user/');
-                if (!response.ok) {
-                    throw new Error('Failed to load user data');
-                }
-                const userData = await response.json();
-                
-                document.getElementById('userName').textContent = userData.username || 'User';
-                
-                const avatarElement = document.getElementById('userAvatar');
-                if (userData.avatar) {
-                    avatarElement.src = userData.avatar;
-                }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                // В случае ошибки загрузки данных, не перенаправляем на логин
-                // просто показываем дефолтные значения
-                document.getElementById('userName').textContent = 'User';
-            }
-        }
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
+                        <textarea id="description" name="description" rows="3" required 
+                                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 
+                                         shadow-sm focus:border-coral-500 focus:ring-coral-500 
+                                         dark:bg-gray-700 dark:text-white sm:text-sm"
+                                  data-i18n-placeholder="enterProjectDescription"></textarea>
+                    </div>
 
-        async function logout() {
-            localStorage.removeItem('access');
-            localStorage.removeItem('refresh');
-            sessionStorage.removeItem('session_expires');
-            window.location.href = '/login.html';
-        }
-
-        function initializeUserMenu() {
-            const menuButton = document.getElementById('userMenuButton');
-            const menu = document.getElementById('userMenu');
-            let isMenuOpen = false;
-
-            menuButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                isMenuOpen = !isMenuOpen;
-                if (isMenuOpen) {
-                    menu.classList.remove('hidden');
-                } else {
-                    menu.classList.add('hidden');
-                }
-            });
-
-            document.addEventListener('click', (e) => {
-                if (isMenuOpen && !menu.contains(e.target) && !menuButton.contains(e.target)) {
-                    menu.classList.add('hidden');
-                    isMenuOpen = false;
-                }
-            });
-        }
-    </script>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" 
+                                onclick="document.getElementById('createProjectModal').classList.add('hidden')" 
+                                class="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                                       border border-gray-300 dark:border-gray-600 rounded-md 
+                                       hover:bg-gray-50 dark:hover:bg-gray-600 
+                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500" 
+                                data-i18n="cancel">Cancel</button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-coral-600 text-white rounded-md 
+                                       hover:bg-coral-700 focus:outline-none focus:ring-2 
+                                       focus:ring-offset-2 focus:ring-coral-500" 
+                                data-i18n="create">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

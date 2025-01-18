@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="connectRepository">Connect Repository - FlowTest</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/projects.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Устанавливаем текущий язык
+            const currentLang = localStorage.getItem('language') || 'ru';
+            localStorage.setItem('language', currentLang);
+            window.i18n.init();
+        });
+    </script>
+    <style>
+        /* Add basic styles here */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        select, input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            margin-top: 0.25rem;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        button {
+            transition: all 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-8" data-i18n="connectRepository">Connect Repository</h1>
+        
+        <form id="repositoryForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="projectSelector" data-i18n="project">
+                    Project
+                </label>
+                <select id="projectSelector" name="project" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="" disabled selected data-i18n="loadingProjects">Loading projects...</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="name" data-i18n="name">
+                    Name
+                </label>
+                <input type="text" id="name" name="name" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="repository_url" data-i18n="repositoryUrl">
+                    Repository URL
+                </label>
+                <input type="text" id="repository_url" name="repository_url" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="repository_type" data-i18n="repositoryType">
+                    Repository Type
+                </label>
+                <select id="repository_type" name="repository_type" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="github" data-i18n="github">GitHub</option>
+                    <option value="gitlab" data-i18n="gitlab">GitLab</option>
+                    <option value="bitbucket" data-i18n="bitbucket">Bitbucket</option>
+                </select>
+            </div>
+
+            <div id="usernameField" class="mb-4" style="display: none;">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username" data-i18n="username">
+                    Username
+                </label>
+                <input type="text" id="username" name="username"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="access_token" data-i18n="accessToken">
+                    Access Token
+                </label>
+                <input type="password" id="access_token" name="access_token" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="branch" data-i18n="branch">
+                    Branch
+                </label>
+                <input type="text" id="branch" name="branch" value="main" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="framework" data-i18n="framework">
+                    Framework
+                </label>
+                <select id="framework" name="framework" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="pytest" data-i18n="pytest">PyTest</option>
+                    <option value="unittest" data-i18n="unittest">UnitTest</option>
+                    <option value="robot" data-i18n="robot">Robot Framework</option>
+                    <option value="playwright" data-i18n="playwright">Playwright</option>
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="tests_directory" data-i18n="testsDirectory">
+                    Tests Directory
+                </label>
+                <input type="text" id="tests_directory" name="tests_directory" value="tests" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button type="button" onclick="window.history.back()"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" data-i18n="back">
+                    Back
+                </button>
+                <button type="submit"
+                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" data-i18n="connect">
+                    Connect
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
+        // Функция для обновления списка проектов
+        function updateProjectSelect(projects) {
+            console.log('Updating project select...');
+            const selectElement = document.getElementById('projectSelector');
+            
+            if (!selectElement) {
+                console.error('Select element not found');
+                return;
+            }
+
+            // Очищаем текущие опции
+            selectElement.innerHTML = '';
+
+            // Добавляем опцию по умолчанию
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = window.i18n.t('selectProject');
+            defaultOption.disabled = true;
+            selectElement.appendChild(defaultOption);
+
+            // Добавляем проекты
+            if (Array.isArray(projects) && projects.length > 0) {
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    selectElement.appendChild(option);
+                });
+                // Выбираем первый проект по умолчанию
+                selectElement.value = projects[0].id;
+            } else {
+                const noProjectsOption = document.createElement('option');
+                noProjectsOption.value = '';
+                noProjectsOption.textContent = window.i18n.t('noProjects');
+                noProjectsOption.disabled = true;
+                selectElement.appendChild(noProjectsOption);
+            }
+        }
+
+        // Функция для загрузки проектов
+        async function fetchProjects() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE_URL}/projects/`);
+                if (!response.ok) {
+                    throw new Error(window.i18n.t('failedToLoadProjects'));
+                }
+                const projects = await response.json();
+                updateProjectSelect(projects);
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                const selectElement = document.getElementById('projectSelector');
+                if (selectElement) {
+                    selectElement.innerHTML = '';
+                    const errorOption = document.createElement('option');
+                    errorOption.value = '';
+                    errorOption.textContent = window.i18n.t('errorLoadingProjects');
+                    errorOption.disabled = true;
+                    selectElement.appendChild(errorOption);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Загружаем проекты при загрузке страницы
+            fetchProjects();
+
+            // Показываем поле username только для Bitbucket
+            document.getElementById('repository_type').addEventListener('change', function() {
+                const usernameField = document.getElementById('usernameField');
+                usernameField.style.display = this.value === 'bitbucket' ? 'block' : 'none';
+            });
+
+            // Обработка отправки формы
+            document.getElementById('repositoryForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = {
+                    name: document.getElementById('name').value,
+                    repository_url: document.getElementById('repository_url').value,
+                    repository_type: document.getElementById('repository_type').value,
+                    branch: document.getElementById('branch').value,
+                    framework: document.getElementById('framework').value,
+                    tests_directory: document.getElementById('tests_directory').value,
+                    access_token: document.getElementById('access_token').value || null,
+                    username: document.getElementById('username').value || null,
+                    project: document.getElementById('projectSelector').value
+                };
+
+                try {
+                    const response = await fetchWithAuth(`${API_BASE_URL}/automation-projects/`, {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || window.i18n.t('failedToConnectRepository'));
+                    }
+
+                    const result = await response.json();
+                    console.log('Repository connected successfully:', result);
+                    window.location.href = 'automation-projects.html';
+                } catch (error) {
+                    console.error('Full error:', error);
+                    alert(window.i18n.t('failedToConnectRepository') + ': ' + error.message);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

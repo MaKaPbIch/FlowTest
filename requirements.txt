@@ -1,0 +1,10 @@
+django
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+gitpython
+pytest
+robotframework
+playwright
+celery>=5.3.0
+redis>=4.5.5

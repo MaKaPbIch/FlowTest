@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Repository Management - FlowTest</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-gray-100">
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <aside class="hidden sm:flex sm:flex-col">
+            <a href="#" class="inline-flex items-center justify-center h-20 w-20 bg-purple-600 hover:bg-purple-500">
+                <img src="images/logo.png" class="h-16 w-16" alt="">
+            </a>
+            <div class="flex-grow flex flex-col justify-between text-gray-500 bg-gray-800">
+                <nav class="flex flex-col mx-4 my-6 space-y-4">
+                    <a href="index.html"
+                        class="inline-flex items-center justify-center py-3 hover:text-gray-400 hover:bg-gray-700 focus:text-gray-400 focus:bg-gray-700 rounded-lg">
+                        <span class="sr-only">Dashboard</span>
+                        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="flex-grow flex flex-col min-h-screen">
+            <!-- Header -->
+            <header class="flex-shrink-0 border-b border-gray-200">
+                <div class="flex items-center justify-between p-2">
+                    <!-- Breadcrumb -->
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-2xl font-semibold text-gray-900">Test Repository Management</h1>
+                    </div>
+
+                    <!-- Header Right -->
+                    <div class="flex items-center space-x-4">
+                        <button id="addRepositoryBtn"
+                            class="flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Add Repository
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-grow p-6">
+                <!-- Repository List -->
+                <div class="bg-white rounded-lg shadow" id="repositoryList">
+                    <!-- Repositories will be loaded here -->
+                </div>
+
+                <!-- Add/Edit Repository Modal -->
+                <div id="repositoryModal"
+                    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <div class="mt-3">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">Add Repository</h3>
+                            <form id="repositoryForm">
+                                <input type="hidden" id="repositoryId">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                                    <input type="text" id="name" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Repository URL</label>
+                                    <input type="url" id="repositoryUrl" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Repository Type</label>
+                                    <select id="repositoryType" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                        <option value="github">GitHub</option>
+                                        <option value="gitlab">GitLab</option>
+                                        <option value="bitbucket">Bitbucket</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Branch</label>
+                                    <input type="text" id="branch" value="main" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Framework</label>
+                                    <select id="framework" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                        <option value="pytest">PyTest</option>
+                                        <option value="unittest">UnitTest</option>
+                                        <option value="robot">Robot Framework</option>
+                                        <option value="playwright">Playwright</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Tests Directory</label>
+                                    <input type="text" id="testsDirectory" value="tests/" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700">Access Token (for private
+                                        repositories)</label>
+                                    <input type="password" id="accessToken"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-4" id="usernameField" style="display: none;">
+                                    <label class="block text-sm font-medium text-gray-700">Username (for
+                                        Bitbucket)</label>
+                                    <input type="text" id="username"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                </div>
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" id="cancelBtn"
+                                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                                        Cancel
+                                    </button>
+                                    <button type="submit"
+                                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/repository-management.js"></script>
+</body>
+
+</html>

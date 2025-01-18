@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Projects - FlowTest</title>
+    <script src="js/theme-preloader.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Automation Projects</h1>
+            <button onclick="showAddProjectModal()" class="px-4 py-2 bg-coral-500 text-white rounded-lg hover:bg-coral-600">
+                Add Project
+            </button>
+        </div>
+
+        <!-- Projects List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projectsList">
+            <!-- Projects will be added here dynamically -->
+        </div>
+
+        <!-- Add Project Modal -->
+        <div id="addProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Add Automation Project</h2>
+                <form id="addProjectForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Name</label>
+                        <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Repository URL</label>
+                        <input type="url" name="repository_url" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Branch</label>
+                        <input type="text" name="branch" value="main" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Framework</label>
+                        <select name="framework" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500">
+                            <option value="pytest">PyTest</option>
+                            <option value="unittest">UnitTest</option>
+                            <option value="robot">Robot Framework</option>
+                            <option value="playwright">Playwright</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="hideAddProjectModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-coral-500 text-white rounded-md hover:bg-coral-600">
+                            Add Project
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/automation-projects.js"></script>
+</body>
+</html> 

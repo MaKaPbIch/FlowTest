@@ -195,3 +195,30 @@ select option:hover {
     background-color: rgb(251, 113, 133) !important;
     color: white !important;
 }
+
+/* Test Case Info Container */
+#testCaseInfoContainer {
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+#testCaseInfoContainer:not(.hidden) {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Folder Tree Styles */
+
+/* Rotation styles */
+.rotate-90 {
+    transform: rotate(90deg);
+}
+
+.folder-item .fa-chevron-right {
+    transition: transform 0.2s ease-in-out;
+}
+
+.folder-item .rotate-90 {
+    transform: rotate(90deg);
+}

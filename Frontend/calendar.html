@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="calendar">Календарь</title>
+    <script src="js/theme-preloader.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <script src="js/i18n.js"></script>
+    <script src="js/theme-manager.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen">
+        <!-- Calendar Container -->
+        <div class="max-w-4xl mx-auto p-6">
+            <!-- Calendar Header -->
+            <div class="flex justify-between items-center mb-6">
+                <button class="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white" data-i18n="calendar.navigation.prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                    <span data-i18n="calendar.months.december">Декабрь</span>
+                    <span>2024</span>
+                </h2>
+                <button class="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white" data-i18n="calendar.navigation.next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="grid grid-cols-7 gap-2 mb-4">
+                <!-- Week Days -->
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.sunday">Вс</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.monday">Пн</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.tuesday">Вт</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.wednesday">Ср</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.thursday">Чт</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.friday">Пт</div>
+                <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="calendar.weekDays.saturday">Сб</div>
+            </div>
+
+            <!-- Add Event Form -->
+            <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4" data-i18n="calendar.event.add">Добавить событие</h3>
+                <form id="eventForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.title">Название события</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" data-i18n-placeholder="calendar.event.titlePlaceholder">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.time">Время</label>
+                        <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.category">Категория</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="test">Тест</option>
+                            <option value="meeting">Встреча</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.reminder">Напоминание</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="none">Нет</option>
+                                <option value="15">За 15 минут</option>
+                                <option value="30">За 30 минут</option>
+                                <option value="60">За 1 час</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.color">Цвет события</label>
+                            <input type="color" class="h-10 w-full rounded-md border border-gray-300 dark:border-gray-600">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="calendar.event.description">Описание</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3" data-i18n-placeholder="calendar.event.descriptionPlaceholder"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" data-i18n="calendar.event.save">
+                        Сохранить событие
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+</html>
