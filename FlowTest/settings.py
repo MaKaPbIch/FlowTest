@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-ihu#1h_^hb=h%m$oef)(4u+l7q38fh8h6$_j=5qiogkn_yx7_r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,16 +41,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'channels',  # Добавляем channels
     'FlowTestApp',
     'rest_framework_simplejwt.token_blacklist',
     'celery',  # Add Celery to installed apps
-    'channels',  # Добавляем channels
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -139,22 +139,31 @@ MEDIA_ROOT = BASE_DIR / 'media'  # Директория для хранения 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# WebSocket settings
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'CONFIG': {
+            'capacity': 1500,
+        },
+    },
+}
+
+# CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
     "http://127.0.0.1:8080",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:8080",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
+    'DELETE',
     'GET',
+    'OPTIONS',
+    'PATCH',
     'POST',
     'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -168,8 +177,6 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -191,16 +198,19 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'FlowTestApp.CustomUser'
 
-# Путь для хранения локальных копий репозиториев с тестами
-AUTOMATION_PROJECTS_DIR = os.path.join(BASE_DIR, 'automation_projects')
-
 # Celery Configuration
-CELERY_BROKER_URL = 'memory://'
-CELERY_RESULT_BACKEND = 'cache+memory://'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# Путь для хранения локальных копий репозиториев с тестами
+AUTOMATION_PROJECTS_DIR = os.path.join(BASE_DIR, 'automation_projects')
 
 # Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {
@@ -208,12 +218,6 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'FlowTestApp.tasks.check_scheduled_tests',
         'schedule': 60.0,  # каждую минуту
     },
-}
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
-    }
 }
 
 # Logging Configuration

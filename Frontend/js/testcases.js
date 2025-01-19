@@ -5,18 +5,23 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // Функция для показа уведомлений
 function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-500' : 
-        type === 'error' ? 'bg-red-500' : 
-        'bg-blue-500'
-    } text-white`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
     
-    // Удаляем уведомление через 3 секунды
+    document.body.appendChild(toast);
+    
+    // Анимация появления
     setTimeout(() => {
-        notification.remove();
+        toast.classList.add('show');
+    }, 100);
+    
+    // Автоматическое скрытие через 3 секунды
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
     }, 3000);
 }
 
@@ -41,7 +46,6 @@ window.testCaseManager = {
         document.getElementById('saveButton')?.addEventListener('click', () => this.saveChanges());
         document.getElementById('cancelButton')?.addEventListener('click', () => this.cancelEdit());
         document.getElementById('deleteButton')?.addEventListener('click', () => this.deleteTestCase());
-        document.getElementById('runTestButton')?.addEventListener('click', () => this.runTest());
         
         // Загружаем тест-кейсы
         await this.loadTestCases();
@@ -327,23 +331,17 @@ window.testCaseManager = {
 
     // Обновление состояния кнопки запуска теста
     async updateRunButton(testCase) {
-        const runButton = document.getElementById('runTestButton');
-        if (!runButton) return;
-
-        const { exists, hasCode } = await this.checkTestInRepository(testCase);
+        const runButton = document.querySelector('.test-case-actions button');
         
-        runButton.disabled = !(exists && hasCode);
-        runButton.title = !hasCode ? 'Test code not found in repository' :
-                         !exists ? 'Test not found in repository' : 
-                         'Run test';
-        
-        // Обновляем стили кнопки
-        if (exists && hasCode) {
-            runButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            runButton.classList.add('hover:bg-[#FF6347]');
-        } else {
-            runButton.classList.add('opacity-50', 'cursor-not-allowed');
-            runButton.classList.remove('hover:bg-[#FF6347]');
+        if (runButton) {
+            const { exists, hasCode } = await this.checkTestInRepository(testCase);
+            if (exists && hasCode) {
+                runButton.removeAttribute('disabled');
+                runButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                runButton.setAttribute('disabled', 'true');
+                runButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
         }
     },
 
@@ -363,6 +361,9 @@ window.testCaseManager = {
             return;
         }
 
+        // Добавляем атрибут data-selected-test
+        testCaseInfo.setAttribute('data-selected-test', testCase.id);
+
         // Создаем базовую структуру HTML
         testCaseInfo.innerHTML = `
             <div class="h-full w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
@@ -378,6 +379,10 @@ window.testCaseManager = {
                             <span id="testCaseId" class="hidden">${testCase.id}</span>
                         </div>
                         <div class="flex space-x-3">
+                            <button onclick="testCaseManager.runTest()" class="px-4 py-2 bg-[#FF7F50] text-white rounded-lg hover:bg-[#FF6347] transition-colors duration-300 flex items-center justify-center space-x-2">
+                                <i class="fas fa-play"></i>
+                                <span>Run Test</span>
+                            </button>
                             <button id="editButton" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
                                 <i class="fas fa-edit mr-2"></i>Edit
                             </button>
@@ -457,7 +462,7 @@ window.testCaseManager = {
                             </button>
                         </div>
                         <div id="stepsContainer" class="space-y-4">
-                            ${(testCase.steps || []).map((step, index) => `
+                            ${Array.isArray(testCase.steps) ? testCase.steps.map((step, index) => `
                                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-100 dark:border-gray-700">
                                     <div class="flex justify-between items-start mb-3">
                                         <span class="font-medium text-gray-700 dark:text-gray-300">Step ${index + 1}</span>
@@ -470,7 +475,7 @@ window.testCaseManager = {
                                         <textarea class="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200" readonly>${step.expected_result || ''}</textarea>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `).join('') : ''}
                         </div>
                     </div>
 
@@ -483,9 +488,6 @@ window.testCaseManager = {
                             <div class="space-x-3">
                                 <button id="saveButton" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 hidden">
                                     <i class="fas fa-save mr-2"></i>Save Changes
-                                </button>
-                                <button id="runTestButton" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                    <i class="fas fa-play mr-2"></i>Run Test
                                 </button>
                             </div>
                         </div>
@@ -799,29 +801,20 @@ window.testCaseManager = {
 
     // Запуск теста
     async runTest() {
-        if (!this.current || !this.current.id) {
-            showNotification('No test case selected', 'error');
+        console.log('runTest called');
+        console.log('Current test:', this.current);
+        
+        if (!this.current) {
+            console.error('No test case selected');
             return;
-        }
-
-        const { exists, hasCode } = await this.checkTestInRepository(this.current);
-        if (!exists || !hasCode) {
-            showNotification('Test cannot be run: not found in repository or missing code', 'error');
-            return;
-        }
-
-        // Создаем менеджер выполнения тестов если еще не создан
-        if (!window.testExecutionManager) {
-            window.testExecutionManager = new TestExecutionManager();
         }
 
         try {
-            // Запускаем тест
-            await window.testExecutionManager.startTest(this.current.id);
-            showNotification('Test execution started', 'success');
+            console.log('Running test:', this.current.id);
+            await window.testExecutionManager.executeTest(this.current.id);
         } catch (error) {
             console.error('Error running test:', error);
-            showNotification('Failed to start test execution', 'error');
+            showNotification(error.message, 'error');
         }
     },
 

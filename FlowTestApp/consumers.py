@@ -4,6 +4,9 @@ from channels.db import database_sync_to_async
 from .models import TestRun, TestReport, TestEvent
 import logging
 from asgiref.sync import async_to_sync
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth.models import User
+from urllib.parse import parse_qs
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +14,27 @@ class TestExecutionConsumer(WebsocketConsumer):
     def connect(self):
         logger.info("WebSocket connect attempt")
         try:
+            # Get token from query string
+            query_string = parse_qs(self.scope['query_string'].decode())
+            token = query_string.get('token', [None])[0]
+            
+            if not token:
+                logger.error("No token provided")
+                self.close()
+                return
+
+            try:
+                # Verify the token
+                access_token = AccessToken(token)
+                user_id = access_token['user_id']
+                user = User.objects.get(id=user_id)
+                self.scope['user'] = user
+                logger.info(f"Authenticated user: {user.username}")
+            except Exception as e:
+                logger.error(f"Token verification failed: {str(e)}")
+                self.close()
+                return
+
             self.test_run_id = self.scope['url_route']['kwargs']['test_run_id']
             self.room_group_name = f'test_execution_{self.test_run_id}'
 
@@ -24,17 +48,13 @@ class TestExecutionConsumer(WebsocketConsumer):
             self.accept()
             logger.info(f"WebSocket connected for test_run_id: {self.test_run_id}")
 
-            # Send initial status
-            status = self.get_test_status()
-            logger.info(f"Sending initial status: {status}")
-            self.send(text_data=json.dumps({
-                'type': 'status',
-                'data': status
-            }))
+            # Send connection confirmation
+            self.send(text_data='connected')
 
         except Exception as e:
             logger.error(f"Error in connect: {str(e)}", exc_info=True)
-            raise
+            self.close()
+            return
 
     def disconnect(self, close_code):
         logger.info(f"WebSocket disconnected with code: {close_code}")
@@ -50,41 +70,47 @@ class TestExecutionConsumer(WebsocketConsumer):
     def receive(self, text_data):
         logger.info(f"Received WebSocket message: {text_data}")
         try:
-            # Handle any messages from client if needed
-            pass
+            text_data_json = json.loads(text_data)
+            message_type = text_data_json.get('type')
+            message_data = text_data_json.get('data')
+
+            if message_type == 'status_request':
+                # Send current test status
+                status = self.get_test_status()
+                self.send(text_data=json.dumps({
+                    'type': 'status',
+                    'data': status
+                }))
         except Exception as e:
             logger.error(f"Error in receive: {str(e)}", exc_info=True)
 
     def test_update(self, event):
+        logger.info(f"Sending test update: {event}")
         try:
-            # Send test update to WebSocket
-            logger.info(f"Sending test update: {event['data']}")
-            self.send(text_data=json.dumps({
-                'type': 'update',
-                'data': event['data']
-            }))
+            # Send message to WebSocket
+            self.send(text_data=json.dumps(event))
         except Exception as e:
             logger.error(f"Error in test_update: {str(e)}", exc_info=True)
 
     def get_test_status(self):
         try:
             test_run = TestRun.objects.get(id=self.test_run_id)
-            test_report = TestReport.objects.filter(test_case=test_run.test_case).last()
-            events = TestEvent.objects.filter(test_report=test_report).order_by('-timestamp')[:5] if test_report else []
-            
-            status_data = {
+            return {
                 'status': test_run.status,
-                'execution_time': str(test_report.execution_time) if test_report and test_report.execution_time else None,
-                'events': [
-                    {
-                        'type': event.event_type,
-                        'description': event.description,
-                        'timestamp': str(event.timestamp)
-                    } for event in events
-                ] if events else []
+                'started_at': test_run.created_at.isoformat() if test_run.created_at else None,
+                'finished_at': test_run.finished_at.isoformat() if test_run.finished_at else None,
+                'duration': test_run.duration,
+                'output': test_run.log_output,
+                'error': test_run.error_message
             }
-            logger.info(f"Got test status: {status_data}")
-            return status_data
+        except TestRun.DoesNotExist:
+            return {
+                'status': 'error',
+                'error': f'Test run {self.test_run_id} not found'
+            }
         except Exception as e:
-            logger.error(f"Error getting test status: {str(e)}")
-            return {'status': 'error', 'error': str(e)}
+            logger.error(f"Error getting test status: {str(e)}", exc_info=True)
+            return {
+                'status': 'error',
+                'error': str(e)
+            }

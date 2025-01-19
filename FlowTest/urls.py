@@ -15,7 +15,9 @@ from FlowTestApp.views import (
     tests_over_time,
     results_distribution,
     priority_distribution,
-    check_test_existence,
+    TestExecutionView,
+    TestStatusView,
+    CheckTestExistenceView,
 )
 from django.views.generic import RedirectView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -45,7 +47,11 @@ urlpatterns = [
     path('api/statistics/tests_over_time/<int:project_id>/', tests_over_time, name='tests_over_time'),
     path('api/statistics/results_distribution/<int:project_id>/', results_distribution, name='results_distribution'),
     path('api/statistics/priority_distribution/<int:project_id>/', priority_distribution, name='priority_distribution'),
-    path('api/check-test-existence/<int:test_id>/', check_test_existence, name='check-test-existence'),
+    
+    # Тестовые endpoints
+    path('api/execute-test/<int:test_id>/', TestExecutionView.as_view(), name='execute-test'),
+    path('api/get-test-status/<int:test_run_id>/', TestStatusView.as_view(), name='get-test-status'),
+    path('api/check-test-existence/<int:test_id>/', CheckTestExistenceView.as_view(), name='check-test-existence'),
 ]
 
 # Добавляем обработку медиа-файлов в режиме разработки

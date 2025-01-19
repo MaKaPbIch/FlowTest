@@ -226,3 +226,13 @@ window.testCases = {
         }
     }
 };
+
+document.addEventListener('DOMContentLoaded', function() {
+    const editButton = document.getElementById('editButton');
+    const saveButton = document.getElementById('saveButton');
+    const cancelButton = document.getElementById('cancelButton');
+    const deleteButton = document.getElementById('deleteButton');
+    const testCaseTitle = document.getElementById('testCaseTitle');
+    const testCaseDescription = document.getElementById('testCaseDescription');
+    const testCaseCode = document.getElementById('testCaseCode');
+});

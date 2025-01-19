@@ -1,82 +1,162 @@
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.views import APIView
+from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Project, Folder, TestCase, TestRun, SchedulerEvent, CustomUser, Role, Permission, AutomationProject, TestSchedule, AutomationTest, TestReport
-from .serializers import ProjectSerializer, FolderSerializer, TestCaseSerializer, TestRunSerializer, SchedulerEventSerializer, CustomUserSerializer, RoleSerializer, AutomationProjectSerializer, AutomationTestSerializer, TestScheduleSerializer
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import get_object_or_404
-from .services.automation_service import AutomationService
-from datetime import timedelta
-from rest_framework.exceptions import ValidationError
-from django.db.models import Q, Count, Avg
-from django.db.models.functions import TruncDate
+from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
+from rest_framework.negotiation import DefaultContentNegotiation
+from django.http import JsonResponse
 from django.utils import timezone
-from django.db import models
+from django.db.models import Count, Avg
+from django.db.models.functions import TruncDate
+from channels.layers import get_channel_layer
+from asgiref.sync import sync_to_async, async_to_sync
+import json
+import logging
+import os
+from datetime import datetime, timedelta
+from .models import (
+    Project, Folder, TestCase, TestRun, Role, CustomUser,
+    AutomationProject, SchedulerEvent, TestReport
+)
+from .serializers import (
+    ProjectSerializer, FolderSerializer, TestCaseSerializer,
+    RoleSerializer, CustomUserSerializer, AutomationProjectSerializer,
+    TestRunSerializer, SchedulerEventSerializer
+)
+from .services.automation_service import AutomationService
 from .services.repository_service import RepositoryService
+from .services.scheduler_service import SchedulerService
+from .tasks import execute_test
+from FlowTest.celery import app
 
+logger = logging.getLogger(__name__)
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+def create_test_run(test_case):
+    """Создает новый тестовый прогон"""
+    test_run = TestRun(
+        test_case=test_case,
+        status='pending',
+        started_at=timezone.now(),
+        log_output='Test execution started...\n'
+    )
+    test_run.save()
+    return test_run
 
-    @action(detail=True, methods=['get'])
-    def folders(self, request, pk=None):
-        """
-        Получить все папки для конкретного проекта
-        """
-        project = self.get_object()
-        folders = project.folders.all()
-        serializer = FolderSerializer(folders, many=True)
-        return Response(serializer.data)
+@sync_to_async
+def get_test_run(test_run_id):
+    test_run = TestRun.objects.get(id=test_run_id)
+    test_run.test_case  # Загружаем test_case сразу
+    return test_run
 
-    @action(detail=True, methods=['get'])
-    def folders_and_test_cases(self, request, pk=None):
-        """
-        Получить все папки и тест-кейсы для конкретного проекта
-        """
-        project = self.get_object()
-        folders = project.folders.all()
-        folder_data = []
+@sync_to_async
+def save_test_run(test_run):
+    test_run.save()
+
+async def run_test_in_thread(test_run_id):
+    """Запуск теста в отдельном потоке"""
+    try:
+        logger.info(f"Starting test execution in thread for test run {test_run_id}")
         
-        for folder in folders:
-            folder_serializer = FolderSerializer(folder)
-            test_cases = folder.test_cases.all()
-            test_case_serializer = TestCaseSerializer(test_cases, many=True)
+        # Получаем тестовый прогон и тест
+        test_run = await sync_to_async(TestRun.objects.get)(id=test_run_id)
+        test_case = test_run.test_case  # Теперь test_case уже загружен
+        
+        # Обновляем статус на running
+        test_run.status = 'running'
+        test_run.log_output = 'Initializing browser...\n'
+        await sync_to_async(test_run.save)()
+        
+        # Импортируем Playwright здесь, чтобы не блокировать основной поток
+        from playwright.sync_api import sync_playwright
+        import threading
+        
+        def run_playwright_test():
+            try:
+                # Запускаем Playwright
+                with sync_playwright() as p:
+                    # Запускаем браузер в видимом режиме
+                    browser = p.chromium.launch(
+                        headless=False,  # Браузер будет видимым
+                        args=['--start-maximized']  # Запускаем в полноэкранном режиме
+                    )
+                    
+                    try:
+                        # Создаем контекст и страницу
+                        context = browser.new_context(viewport={'width': 1920, 'height': 1080})
+                        page = context.new_page()
+                        
+                        # Создаем локальные переменные для теста
+                        test_locals = {
+                            'page': page,
+                            'context': context,
+                            'browser': browser,
+                            'test_run': test_run,
+                            'logger': logger,
+                        }
+                        
+                        # Выполняем тестовый код
+                        exec(test_case.test_code, test_locals)
+                        
+                        # Если дошли до сюда без ошибок, тест пройден
+                        test_run.status = 'passed'
+                        test_run.finished_at = timezone.now()
+                        test_run.duration = (test_run.finished_at - test_run.started_at).total_seconds()
+                        test_run.log_output += '\nTest completed successfully\n'
+                        
+                    except Exception as e:
+                        # Если произошла ошибка при выполнении теста
+                        import traceback
+                        error_details = f'\nTest failed: {str(e)}\n{traceback.format_exc()}'
+                        test_run.status = 'failed'
+                        test_run.finished_at = timezone.now()
+                        test_run.duration = (test_run.finished_at - test_run.started_at).total_seconds()
+                        test_run.error_message = str(e)
+                        test_run.log_output += error_details
+                    
+                    finally:
+                        # Закрываем браузер
+                        if 'context' in locals():
+                            context.close()
+                        browser.close()
             
-            folder_info = folder_serializer.data
-            folder_info['test_cases'] = test_case_serializer.data
-            folder_data.append(folder_info)
+            except Exception as e:
+                # Если произошла ошибка при инициализации Playwright
+                logger.error(f"Error initializing Playwright: {str(e)}", exc_info=True)
+                test_run.status = 'error'
+                test_run.finished_at = timezone.now()
+                test_run.duration = (test_run.finished_at - test_run.started_at).total_seconds()
+                test_run.error_message = f'Failed to initialize Playwright: {str(e)}'
+                test_run.log_output += '\nFailed to initialize browser\n'
         
-        return Response(folder_data)
+        # Запускаем Playwright в отдельном потоке
+        thread = threading.Thread(target=run_playwright_test)
+        thread.start()
+        thread.join()  # Ждем завершения теста
+        
+        # Сохраняем результаты
+        await sync_to_async(test_run.save)()
+            
+    except Exception as e:
+        # Если произошла ошибка при инициализации теста
+        logger.error(f"Error during test execution: {str(e)}", exc_info=True)
+        try:
+            test_run = await sync_to_async(TestRun.objects.get)(id=test_run_id)
+            test_run.status = 'error'
+            test_run.finished_at = timezone.now()
+            test_run.duration = (test_run.finished_at - test_run.started_at).total_seconds()
+            test_run.error_message = f'Failed to initialize test: {str(e)}'
+            test_run.log_output = 'Test initialization failed\n'
+            await sync_to_async(test_run.save)()
+        except Exception as e2:
+            logger.error(f"Failed to update test run status: {str(e2)}", exc_info=True)
 
-
-class FolderViewSet(viewsets.ModelViewSet):
-    queryset = Folder.objects.all()
-    serializer_class = FolderSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-    def get_queryset(self):
-        queryset = Folder.objects.all()
-        project_id = self.request.query_params.get('project', None)
-        if project_id is not None:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-
-    @action(detail=True, methods=['get'])
-    def test_cases(self, request, pk=None):
-        folder = self.get_object()
-        test_cases = folder.test_cases.all()
-        serializer = TestCaseSerializer(test_cases, many=True)
-        return Response(serializer.data)
-
+def run_test_in_thread_sync(test_run_id):
+    """Синхронная обертка для запуска теста"""
+    asyncio.run(run_test_in_thread(test_run_id))
 
 class TestCaseViewSet(viewsets.ModelViewSet):
     queryset = TestCase.objects.all()
@@ -91,48 +171,44 @@ class TestCaseViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(folder_id=folder_id)
         return queryset
 
-    @action(detail=True, methods=['post'], url_path='execute')
-    def run_test(self, request, pk=None):
-        """Запуск автоматизированного теста"""
-        test_case = self.get_object()
+    @action(detail=True, methods=['post'])
+    def execute(self, request, pk=None):
+        """
+        Редирект на асинхронный endpoint
+        """
+        return Response({
+            'status': 'error',
+            'error': 'Please use /api/execute-test/<test_id>/ endpoint'
+        }, status=400)
+    
+    @action(detail=True, methods=['get'])
+    def get_test_status(self, request, pk=None):
+        """
+        Получить статус выполнения теста
+        """
+        logger.info(f"Getting status for test run {pk}")
         
-        # Проверяем, что тест автоматизированный
-        if test_case.test_type != 'automated':
-            return Response({
-                'status': 'error',
-                'message': 'This test case is not automated'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # Проверяем наличие кода теста
-        if not test_case.test_code:
-            return Response({
-                'status': 'error',
-                'message': 'No test code provided'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            # Создаем запись о запуске теста
-            test_run = TestRun.objects.create(
-                test_case=test_case,
-                status='pending',
-                framework='pytest'  # или определяем из кода теста
-            )
-
-            # Запускаем тест асинхронно через Celery
-            from .tasks import run_test
-            run_test.delay(test_run.id)
-            
+            test_run = TestRun.objects.get(id=pk)
             return Response({
-                'status': 'success',
-                'message': 'Test execution started',
-                'test_run_id': test_run.id
+                'status': test_run.status,
+                'started_at': test_run.started_at,
+                'finished_at': test_run.finished_at,
+                'duration': test_run.duration,
+                'output': test_run.log_output,
+                'error': test_run.error_message
             })
-
-        except Exception as e:
+        except TestRun.DoesNotExist:
             return Response({
                 'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'error': f'Test run {pk} not found'
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Error getting test status: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'error': str(e)
+            }, status=500)
 
 
 class TestRunViewSet(viewsets.ModelViewSet):
@@ -147,6 +223,38 @@ class TestRunViewSet(viewsets.ModelViewSet):
         if test_case_id is not None:
             queryset = queryset.filter(test_case_id=test_case_id)
         return queryset
+
+    @action(detail=True, methods=['get'], url_path='status')
+    def get_test_status(self, request, pk=None):
+        """
+        Получить статус выполнения теста
+        """
+        logger.info(f"Getting status for test run {pk}")
+        
+        try:
+            test_run = TestRun.objects.get(id=pk)
+            
+            return Response({
+                'status': test_run.status,
+                'started_at': test_run.created_at,
+                'finished_at': test_run.finished_at,
+                'duration': test_run.duration,
+                'output': test_run.log_output,
+                'error': test_run.error_message
+            })
+            
+        except TestRun.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'error': f'Test run {pk} not found'
+            }, status=404)
+            
+        except Exception as e:
+            logger.error(f"Error getting test status: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'error': str(e)
+            }, status=500)
 
 
 class SchedulerEventViewSet(viewsets.ModelViewSet):
@@ -336,7 +444,7 @@ class AutomationProjectViewSet(viewsets.ModelViewSet):
         """Получение списка тестов проекта"""
         project = self.get_object()
         tests = project.tests.all()
-        serializer = AutomationTestSerializer(tests, many=True)
+        serializer = TestCaseSerializer(tests, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
@@ -380,15 +488,295 @@ class AutomationProjectViewSet(viewsets.ModelViewSet):
         project = self.get_object()
         schedule_data = request.data
         
-        serializer = TestScheduleSerializer(data=schedule_data)
+        serializer = SchedulerEventSerializer(data=schedule_data)
         if serializer.is_valid():
             serializer.save(project=project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @action(detail=True, methods=['get'])
+    def folders(self, request, pk=None):
+        """
+        Получить все папки для конкретного проекта
+        """
+        project = self.get_object()
+        folders = project.folders.all()
+        serializer = FolderSerializer(folders, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def folders_and_test_cases(self, request, pk=None):
+        """
+        Получить все папки и тест-кейсы для конкретного проекта
+        """
+        project = self.get_object()
+        folders = project.folders.all()
+        folder_data = []
+        
+        for folder in folders:
+            folder_serializer = FolderSerializer(folder)
+            test_cases = folder.test_cases.all()
+            test_case_serializer = TestCaseSerializer(test_cases, many=True)
+            
+            folder_info = folder_serializer.data
+            folder_info['test_cases'] = test_case_serializer.data
+            folder_data.append(folder_info)
+        
+        return Response(folder_data)
+
+
+class FolderViewSet(viewsets.ModelViewSet):
+    queryset = Folder.objects.all()
+    serializer_class = FolderSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get_queryset(self):
+        queryset = Folder.objects.all()
+        project_id = self.request.query_params.get('project', None)
+        if project_id is not None:
+            queryset = queryset.filter(project_id=project_id)
+        return queryset
+
+    @action(detail=True, methods=['get'])
+    def test_cases(self, request, pk=None):
+        folder = self.get_object()
+        test_cases = folder.test_cases.all()
+        serializer = TestCaseSerializer(test_cases, many=True)
+        return Response(serializer.data)
+
+
+class AsyncAuthMixin(APIView):
+    """
+    Миксин для асинхронной аутентификации в классах-представлениях
+    """
+    renderer_classes = [JSONRenderer]
+    content_negotiation_class = DefaultContentNegotiation
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.headers = {}
+
+    def prepare_request(self, request):
+        """
+        Подготавливает request для DRF
+        """
+        request.query_params = request.GET
+        request.data = getattr(request, '_body', request.POST)
+        request._request = request
+        request._full_data = request.data
+        return request
+
+    async def dispatch(self, request, *args, **kwargs):
+        """
+        Асинхронная обработка запроса с поддержкой аутентификации
+        """
+        self.args = args
+        self.kwargs = kwargs
+        self.request = self.prepare_request(request)
+        self.headers = {}
+        self.format_kwarg = None
+
+        # Выполняем аутентификацию асинхронно
+        if not hasattr(request, '_user'):
+            request._user = await sync_to_async(self._authenticate_credentials, thread_sensitive=False)(request)
+            request.user = request._user
+
+        # Определяем формат ответа
+        request.accepted_renderer = self.renderer_classes[0]()
+        request.accepted_media_type = request.accepted_renderer.media_type
+
+        try:
+            handler = getattr(self, request.method.lower())
+            response = await handler(request, *args, **kwargs)
+            
+            if not isinstance(response, Response):
+                response = Response(response)
+            
+            response.accepted_renderer = request.accepted_renderer
+            response.accepted_media_type = request.accepted_media_type
+            response.renderer_context = {
+                'view': self,
+                'args': self.args,
+                'kwargs': self.kwargs,
+                'request': request
+            }
+            
+            return response
+
+        except Exception as exc:
+            response = self.handle_exception(exc)
+            response.accepted_renderer = request.accepted_renderer
+            response.accepted_media_type = request.accepted_media_type
+            response.renderer_context = {
+                'view': self,
+                'args': self.args,
+                'kwargs': self.kwargs,
+                'request': request
+            }
+            return response
+
+    def _authenticate_credentials(self, request):
+        """
+        Синхронная функция для аутентификации, которую мы обернем в sync_to_async
+        """
+        for authenticator in self.authentication_classes:
+            try:
+                user_auth_tuple = authenticator().authenticate(request)
+                if user_auth_tuple is not None:
+                    return user_auth_tuple[0]
+            except:
+                continue
+        return None
+
+
+class TestExecutionView(AsyncAuthMixin):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    async def post(self, request, test_id):
+        logger.info(f"Executing test {test_id}")
+        try:
+            test_case = await sync_to_async(TestCase.objects.get)(id=test_id)
+            logger.info(f"Found test case: {test_case}")
+            
+            # Создаем новый тестовый прогон
+            test_run = await sync_to_async(TestRun.objects.create)(
+                test_case=test_case,
+                status='pending',
+                started_at=timezone.now()
+            )
+            logger.info(f"Created test run: {test_run}")
+            
+            # Запускаем выполнение теста в Celery
+            from .tasks import execute_test
+            task = execute_test.delay(test_run.id)
+            logger.info(f"Started Celery task: {task.id}")
+            
+            return Response({
+                'status': 'success',
+                'message': 'Test execution started',
+                'test_run_id': test_run.id,
+                'task_id': task.id
+            })
+            
+        except TestCase.DoesNotExist:
+            logger.error(f"Test case {test_id} not found")
+            return Response({
+                'status': 'error',
+                'error': f'Test case {test_id} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            logger.error(f"Error executing test {test_id}: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    async def options(self, request, *args, **kwargs):
+        """
+        Handle preflight CORS requests
+        """
+        response = Response()
+        response["Access-Control-Allow-Origin"] = "http://127.0.0.1:8080"
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+
+class TestStatusView(AsyncAuthMixin):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    async def get(self, request, test_run_id):
+        """
+        Получение статуса выполнения теста
+        """
+        logger.info(f"Getting status for test run {test_run_id}")
+        
+        try:
+            test_run = await sync_to_async(TestRun.objects.select_related('test_case').get)(id=test_run_id)
+            
+            response_data = {
+                'status': test_run.status,
+                'test_case_id': test_run.test_case.id if test_run.test_case else None,
+                'test_case_title': test_run.test_case.title if test_run.test_case else None,
+                'started_at': test_run.started_at.isoformat() if test_run.started_at else None,
+                'finished_at': test_run.finished_at.isoformat() if test_run.finished_at else None,
+                'duration': test_run.duration,
+                'error_message': test_run.error_message,
+                'log_output': test_run.log_output
+            }
+            
+            return Response(response_data)
+            
+        except TestRun.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'error': f'Test run {test_run_id} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            logger.error(f"Error getting test status: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    async def options(self, request, *args, **kwargs):
+        """
+        Handle preflight CORS requests
+        """
+        response = Response()
+        response["Access-Control-Allow-Origin"] = "http://127.0.0.1:8080"
+        response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+
+class CheckTestExistenceView(AsyncAuthMixin):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    async def get(self, request, test_id):
+        """
+        Проверка существования теста в репозитории
+        """
+        try:
+            result = await sync_to_async(RepositoryService.check_test_existence, thread_sensitive=False)(test_id)
+            return Response(result)
+        except Exception as e:
+            logger.error(f"Error checking test existence: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'error': str(e)
+            }, status=500)
+
+
+@api_view(['POST'])
+def execute_test_api(request, test_id):
+    """Запуск теста"""
+    try:
+        test_case = TestCase.objects.get(id=test_id)
+        # Создаем запись о запуске теста
+        test_run = TestRun.objects.create(
+            test_case=test_case,
+            status='pending'
+        )
+        return Response({'test_run_id': test_run.id})
+    except TestCase.DoesNotExist:
+        return Response({'error': 'Test not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def check_test_existence(request, test_id):
     """
     Проверяет наличие теста в репозитории и наличие кода теста

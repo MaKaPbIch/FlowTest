@@ -1,213 +1,253 @@
 class TestExecutionManager {
-    constructor(testRunId) {
-        this.testRunId = testRunId;
-        this.ws = null;
-        this.statusElement = document.getElementById('test-status');
-        this.eventsElement = document.getElementById('test-events');
-        this.progressElement = document.getElementById('test-progress');
-        this.setupWebSocket();
+    constructor() {
+        this.testRunId = null;
+        this.pollInterval = null;
+        this.lastOutput = '';
+        this.startTime = null;
+        this.activeTests = new Map();
+        this.baseUrl = 'http://127.0.0.1:8000'; // Базовый URL API
+        console.log('TestExecutionManager initialized');
     }
 
-    async startTest(testCaseId) {
+    async executeTest(testCaseId) {
+        console.log('executeTest called with ID:', testCaseId);
         try {
-            // Отправляем запрос на запуск теста
-            const response = await fetch(`${API_BASE_URL}/testcases/${testCaseId}/execute/`, {
+            const response = await fetch(`${this.baseUrl}/api/execute-test/${testCaseId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('access')}`
-                }
+                },
+                body: JSON.stringify({})
             });
 
             if (!response.ok) {
-                const errorBody = await response.text();
-                console.error('Error response body:', errorBody);
-                throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+                const errorText = await response.text();
+                let errorMessage;
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.error || errorData.detail || `HTTP error! status: ${response.status}`;
+                } catch (e) {
+                    errorMessage = errorText || `HTTP error! status: ${response.status}`;
+                }
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            this.testRunId = data.test_run_id;
-            this.setupWebSocket();
+            console.log('Test execution started:', data);
+            
+            if (data.test_run_id) {
+                this.testRunId = data.test_run_id;
+                this.startTime = new Date();
+                this.activeTests.set(data.test_run_id, {
+                    testCaseId,
+                    startTime: new Date()
+                });
+                this.startPolling(data.test_run_id);
+                this.showExecutionPanel();
+            }
+            
             return data;
-
         } catch (error) {
-            console.error('Error starting test:', error);
+            console.error('Error executing test:', error);
+            this.updateStatus({
+                status: 'error',
+                error_message: error.message
+            });
             throw error;
         }
     }
 
-    setupWebSocket() {
-        if (this.testRunId) {
-            console.log(`Setting up WebSocket for test run ${this.testRunId}`);
-            this.ws = new WebSocket(`ws://${window.location.host}/ws/test_execution/${this.testRunId}/`);
-            
-            this.ws.onopen = () => {
-                console.log('WebSocket connection established');
-            };
+    async executeAllTests(projectId) {
+        console.log('executeAllTests called with project ID:', projectId);
+        try {
+            const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/run-all-tests/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                },
+                body: JSON.stringify({})
+            });
 
-            this.ws.onmessage = (event) => {
-                console.log('Received WebSocket message:', event.data);
-                
-                // Игнорируем встроенное сообщение "connected"
-                if (event.data === "connected") {
-                    console.log('Received connection confirmation');
-                    return;
-                }
+            console.log('API response:', response);
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error text:', errorText);
+                let errorMessage;
                 try {
-                    const message = JSON.parse(event.data);
-                    console.log('Parsed WebSocket message:', message);
-                    
-                    switch (message.type) {
-                        case 'status':
-                            console.log('Received status update:', message.data);
-                            this.updateUI(message.data);
-                            break;
-                        case 'update':
-                            console.log('Received test update:', message.data);
-                            this.updateUI(message.data);
-                            break;
-                        default:
-                            console.log('Unknown message type:', message.type);
-                    }
-                } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
-                    console.log('Raw message:', event.data);
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.error || errorData.detail || `HTTP error! status: ${response.status}`;
+                } catch (e) {
+                    errorMessage = errorText || `HTTP error! status: ${response.status}`;
                 }
-            };
+                throw new Error(errorMessage);
+            }
 
-            this.ws.onclose = () => {
-                console.log('WebSocket connection closed');
-                this.statusElement.textContent = 'Connection lost';
-                this.statusElement.className = 'status status-error';
-            };
+            const data = await response.json();
+            console.log('All tests execution started:', data);
 
-            this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                this.statusElement.textContent = 'Connection error';
-                this.statusElement.className = 'status status-error';
-            };
+            data.test_runs.forEach(run => {
+                console.log('Test run:', run);
+                this.activeTests.set(run.test_run_id, {
+                    testCaseId: run.test_id,
+                    startTime: new Date()
+                });
+                this.startPolling(run.test_run_id);
+            });
+
+            this.showExecutionPanel();
+            return data;
+        } catch (error) {
+            console.error('Error executing all tests:', error);
+            this.updateStatus({
+                status: 'error',
+                error_message: error.message
+            });
+            throw error;
         }
     }
 
-    updateUI(data) {
-        console.log('Updating UI with data:', data);
-        // Обновляем статус
-        if (data.status) {
-            console.log('Updating status:', data.status);
-            this.statusElement.textContent = data.status;
-            this.statusElement.className = `status status-${data.status}`;
-        }
-
-        // Обновляем прогресс для Selenium/Playwright тестов
-        if (data.framework && (data.framework === 'selenium' || data.framework === 'playwright')) {
-            console.log('Updating progress for', data.framework);
-            this.updateProgress(data);
-        }
-
-        // Добавляем новое событие
-        if (data.events && data.events.length > 0) {
-            console.log('Adding events:', data.events);
-            data.events.forEach(event => this.addEvent(event));
-        }
-
-        // Если тест завершен, показываем итоговый результат
-        if (data.status === 'passed' || data.status === 'failed') {
-            console.log('Test finished with status:', data.status);
-            this.showTestResult(data);
+    showExecutionPanel() {
+        console.log('Showing execution panel');
+        const panel = document.getElementById('testExecutionPanel');
+        if (panel) {
+            panel.classList.remove('hidden');
         }
     }
 
-    updateProgress(data) {
-        if (data.event && data.event.type === 'step_complete') {
-            const progress = document.createElement('div');
-            progress.className = 'progress-step';
-            progress.innerHTML = `
-                <span class="step-name">${data.event.description}</span>
-                <span class="step-time">${new Date(data.event.timestamp).toLocaleTimeString()}</span>
-            `;
-            this.progressElement.appendChild(progress);
+    async startPolling(testRunId) {
+        console.log('Starting polling for test run:', testRunId);
+        if (!testRunId) {
+            console.error('Cannot start polling: no test run ID');
+            return;
+        }
+
+        console.log('Starting status polling for test run', testRunId);
+
+        const pollTest = async () => {
+            try {
+                const response = await fetch(`${this.baseUrl}/api/get-test-status/${testRunId}/`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+
+                console.log('API response:', response);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API error text:', errorText);
+                    let errorMessage;
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMessage = errorData.error || errorData.detail || `HTTP error! status: ${response.status}`;
+                    } catch (e) {
+                        errorMessage = errorText || `HTTP error! status: ${response.status}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                console.log('Test status:', data);
+
+                this.updateStatus(data, testRunId);
+
+                if (['success', 'failed', 'error'].includes(data.status)) {
+                    this.stopPolling(testRunId);
+                    
+                    if (data.selenium_video_path) {
+                        this.showSeleniumVisualization(data);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error polling test status:', error);
+                this.stopPolling(testRunId);
+            }
+        };
+
+        const intervalId = setInterval(pollTest, 1000);
+        this.activeTests.get(testRunId).intervalId = intervalId;
+    }
+
+    stopPolling(testRunId) {
+        console.log('Stopping polling for test run:', testRunId);
+        const testInfo = this.activeTests.get(testRunId);
+        if (testInfo && testInfo.intervalId) {
+            clearInterval(testInfo.intervalId);
+            this.activeTests.delete(testRunId);
         }
     }
 
-    addEvent(event) {
-        const eventElement = document.createElement('div');
-        eventElement.className = `event event-${event.severity}`;
-        eventElement.innerHTML = `
-            <span class="event-time">${new Date(event.timestamp).toLocaleTimeString()}</span>
-            <span class="event-type">${event.type}</span>
-            <span class="event-description">${event.description}</span>
-        `;
-        this.eventsElement.insertBefore(eventElement, this.eventsElement.firstChild);
-    }
-
-    showTestResult(data) {
-        const resultElement = document.createElement('div');
-        resultElement.className = `test-result test-result-${data.status}`;
+    showSeleniumVisualization(data) {
+        console.log('Showing Selenium visualization');
+        const visualizationPanel = document.getElementById('seleniumVisualization');
+        const video = document.getElementById('testVideo');
+        const actionsLog = document.getElementById('browserActions');
         
-        let content = `<h3>Test Execution Complete</h3>`;
-        content += `<p>Status: ${data.status}</p>`;
-        
-        if (data.execution_time) {
-            content += `<p>Execution Time: ${data.execution_time}</p>`;
+        if (visualizationPanel && video && actionsLog) {
+            visualizationPanel.classList.remove('hidden');
+            video.src = `${this.baseUrl}${data.selenium_video_path}`;
+            
+            if (data.browser_logs) {
+                actionsLog.innerHTML = data.browser_logs.map(log => `
+                    <div class="mb-2 p-2 border-b border-gray-200 dark:border-gray-600">
+                        <span class="font-semibold">${log.action}:</span>
+                        <span class="ml-2">${log.element || log.url}</span>
+                        <span class="text-sm text-gray-500 ml-2">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                `).join('');
+            }
         }
+    }
+
+    updateStatus(data, testRunId) {
+        console.log('Updating status for test run:', testRunId);
+        const testInfo = this.activeTests.get(testRunId);
+        if (!testInfo) return;
+
+        const statusElement = document.getElementById('currentStatus');
+        const outputElement = document.getElementById('testOutput');
+        const durationElement = document.getElementById('testDuration');
+        const errorElement = document.getElementById('testError');
         
-        if (data.has_error) {
-            content += `<div class="error-details">
-                <h4>Error Details</h4>
-                <pre>${data.events.find(e => e.severity === 'error')?.description || 'No error details available'}</pre>
-            </div>`;
+        if (statusElement) {
+            statusElement.textContent = data.status;
+            statusElement.className = `px-3 py-1 rounded-full text-white ${this.getStatusColor(data.status)}`;
         }
 
-        resultElement.innerHTML = content;
-        document.getElementById('test-result-container').appendChild(resultElement);
+        if (outputElement && data.log_output && data.log_output !== this.lastOutput) {
+            this.lastOutput = data.log_output;
+            outputElement.textContent = data.log_output;
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+
+        if (durationElement) {
+            const duration = data.duration || (new Date() - testInfo.startTime) / 1000;
+            durationElement.textContent = `${duration.toFixed(2)}s`;
+        }
+
+        if (data.error_message && errorElement) {
+            errorElement.textContent = data.error_message;
+            errorElement.classList.remove('hidden');
+        }
+    }
+
+    getStatusColor(status) {
+        console.log('Getting status color for:', status);
+        const colors = {
+            'pending': 'bg-gray-500',
+            'running': 'bg-blue-500',
+            'success': 'bg-green-500',
+            'failed': 'bg-red-500',
+            'error': 'bg-red-600'
+        };
+        return colors[status] || 'bg-gray-500';
     }
 }
 
-// Стили для отображения статуса выполнения теста
-const styles = `
-    .status { padding: 5px 10px; border-radius: 4px; margin: 10px 0; }
-    .status-in_progress { background: #fff3cd; color: #856404; }
-    .status-passed { background: #d4edda; color: #155724; }
-    .status-failed { background: #f8d7da; color: #721c24; }
-    
-    .event { padding: 8px; margin: 5px 0; border-left: 4px solid #ddd; }
-    .event-info { border-left-color: #17a2b8; }
-    .event-error { border-left-color: #dc3545; background: #fff3f3; }
-    .event-warning { border-left-color: #ffc107; }
-    
-    .progress-step { 
-        display: flex; 
-        justify-content: space-between;
-        padding: 5px 10px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .test-result {
-        margin: 20px 0;
-        padding: 15px;
-        border-radius: 4px;
-    }
-    .test-result-passed { background: #d4edda; }
-    .test-result-failed { background: #f8d7da; }
-    
-    .error-details {
-        margin-top: 15px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 4px;
-    }
-    .error-details pre {
-        margin: 0;
-        padding: 10px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        overflow-x: auto;
-    }
-`;
-
-// Добавляем стили на страницу
-const styleSheet = document.createElement("style");
-styleSheet.textContent = styles;
-document.head.appendChild(styleSheet);
+document.addEventListener('DOMContentLoaded', () => {
+    window.testExecutionManager = new TestExecutionManager();
+});

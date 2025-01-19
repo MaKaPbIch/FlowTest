@@ -5,7 +5,14 @@ from django.conf import settings
 from django.utils import timezone
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
+from asgiref.sync import sync_to_async
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import threading
+from playwright.sync_api import sync_playwright
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 class Project(models.Model):
@@ -86,45 +93,28 @@ class TestCase(models.Model):
         ordering = ['title']
 
 class TestRun(models.Model):
-    test_case = models.ForeignKey(TestCase, on_delete=models.SET_NULL, null=True, blank=True, related_name="test_runs")
-    status = models.CharField(
-        max_length=50,
-        choices=[
-            ('pending', 'Pending'),
-            ('running', 'Running'),
-            ('passed', 'Passed'),
-            ('failed', 'Failed'),
-            ('error', 'Error'),
-            ('skipped', 'Skipped')
-        ],
-        default='pending'
-    )
-    framework = models.CharField(
-        max_length=20,
-        choices=[
-            ('pytest', 'PyTest'),
-            ('unittest', 'UnitTest'),
-            ('robot', 'Robot Framework'),
-            ('playwright', 'Playwright')
-        ],
-        default='pytest'
-    )
-    started_at = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(null=True, blank=True)
-    duration = models.FloatField(null=True, blank=True)  # в секундах
+    test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE, null=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('error', 'Error')
+    ], default='pending')
+    started_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+    duration = models.FloatField(null=True, help_text='Duration in seconds')
     error_message = models.TextField(null=True, blank=True)
     log_output = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.started_at and self.finished_at and not self.duration:
+            self.duration = (self.finished_at - self.started_at).total_seconds()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Test Run {self.id} - {self.test_case.title if self.test_case else 'No test case'} ({self.status})"
 
-    @classmethod
-    def create_dummy_run(cls, test_case):
-        """Создает тестовый прогон для демонстрации"""
-        import random
-        status = random.choice(['passed', 'failed', 'skipped'])
-        return cls.objects.create(test_case=test_case, status=status)
-    
 class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
     permissions = models.ManyToManyField(Permission, related_name='roles', blank=True)

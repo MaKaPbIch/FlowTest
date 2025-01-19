@@ -1,10 +1,12 @@
 import os
 from celery import Celery
-from django.conf import settings
-from celery.schedules import crontab
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FlowTest.settings')
+
+# Настраиваем Django перед импортом tasks
+import django
+django.setup()
 
 app = Celery('FlowTest')
 
@@ -12,9 +14,21 @@ app = Celery('FlowTest')
 # the configuration object to child processes.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Load task modules from all registered Django apps.
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+# Configure Celery
+# Использовать Redis в качестве брокера и бэкенда результатов
+app.conf.broker_url = 'redis://localhost:6379/0'
+app.conf.result_backend = 'redis://localhost:6379/1'
 
-@app.task(bind=True, ignore_result=True)
+# Настройки для Windows
+# app.conf.broker_connection_retry_on_startup = True
+# app.conf.worker_pool_restarts = True
+
+# Load task modules from all registered Django apps.
+app.autodiscover_tasks(['FlowTestApp'])
+
+# Явно импортируем tasks после инициализации Django
+# import FlowTestApp.tasks
+
+@app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
