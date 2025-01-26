@@ -10,7 +10,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Max, Q, F
 from django.db.models.functions import TruncDate
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
@@ -170,6 +170,10 @@ class TestCaseViewSet(viewsets.ModelViewSet):
         if folder_id is not None:
             queryset = queryset.filter(folder_id=folder_id)
         return queryset
+
+    def perform_create(self, serializer):
+        """Автоматически устанавливаем текущего пользователя как автора"""
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
@@ -786,64 +790,7 @@ def check_test_existence(request, test_id):
 
 
 @api_view(['GET'])
-def tests_over_time(request, project_id):
-    """
-    Возвращает статистику успешности тестов по времени для указанного проекта
-    """
-    try:
-        # Получаем все тест-кейсы проекта через папки
-        project = Project.objects.get(id=project_id)
-        print(f"Project found: {project}")
-        
-        folders = Folder.objects.filter(project=project)
-        print(f"Found {folders.count()} folders")
-        
-        test_cases = TestCase.objects.filter(folder__in=folders)
-        print(f"Found {test_cases.count()} test cases")
-        
-        # Получаем все отчеты за последние 30 дней
-        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
-        reports = TestReport.objects.filter(
-            test_case__in=test_cases,
-            execution_date__gte=thirty_days_ago
-        ).order_by('execution_date')
-        print(f"Found {reports.count()} reports")
-        
-        # Группируем отчеты по дням
-        daily_stats = {}
-        for report in reports:
-            date = report.execution_date.date().isoformat()
-            if date not in daily_stats:
-                daily_stats[date] = {'total': 0, 'passed': 0}
-            daily_stats[date]['total'] += 1
-            if report.status == 'passed':
-                daily_stats[date]['passed'] += 1
-        
-        print(f"Daily stats: {daily_stats}")
-
-        # Формируем массивы для графика
-        dates = sorted(daily_stats.keys())
-        success_rates = [
-            round((daily_stats[date]['passed'] / daily_stats[date]['total']) * 100)
-            if daily_stats[date]['total'] > 0 else 0
-            for date in dates
-        ]
-        
-        result = {
-            'labels': dates,
-            'success_rate': success_rates
-        }
-        print(f"Returning result: {result}")
-        return Response(result)
-    except Project.DoesNotExist:
-        print("Project not found")
-        return Response({'error': 'Project not found'}, status=404)
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return Response({'error': str(e)}, status=500)
-
-
-@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def results_distribution(request, project_id):
     """
     Возвращает распределение результатов тестов для указанного проекта
@@ -863,7 +810,7 @@ def results_distribution(request, project_id):
         latest_reports = TestReport.objects.filter(
             test_case__in=test_cases
         ).values('test_case').annotate(
-            latest_id=models.Max('id')
+            latest_id=Max('id')
         )
         print(f"Found {len(latest_reports)} latest reports")
         
@@ -887,6 +834,7 @@ def results_distribution(request, project_id):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def priority_distribution(request, project_id):
     """
     Возвращает распределение тестов по приоритетам для указанного проекта
@@ -894,37 +842,90 @@ def priority_distribution(request, project_id):
     try:
         # Получаем все тест-кейсы проекта через папки
         project = Project.objects.get(id=project_id)
-        print(f"Project found: {project}")
-        
         folders = Folder.objects.filter(project=project)
-        print(f"Found {folders.count()} folders")
-        
         test_cases = TestCase.objects.filter(folder__in=folders)
-        print(f"Found {test_cases.count()} test cases")
-        print(f"Test cases priorities: {list(test_cases.values_list('priority', flat=True))}")
         
         # Подсчитываем количество тестов для каждого приоритета
-        priority_counts = test_cases.values('priority').annotate(
-            count=models.Count('id')
-        )
-        print(f"Priority counts raw: {list(priority_counts)}")
+        distribution = test_cases.values('priority').annotate(
+            count=Count('id')
+        ).order_by('priority')
         
-        # Преобразуем результаты в нужный формат
-        stats = {
-            'High': 0,
-            'Medium': 0,
-            'Low': 0
+        # Преобразуем в словарь для удобства
+        result = {
+            'high': 0,
+            'medium': 0,
+            'low': 0
         }
         
-        for item in priority_counts:
-            priority = item['priority']
-            if priority in stats:
-                stats[priority] = item['count']
+        for item in distribution:
+            if item['priority'] in result:
+                result[item['priority']] = item['count']
         
-        print(f"Final stats: {stats}")
-        return Response(stats)
+        return Response(result)
     except Project.DoesNotExist:
-        print("Project not found")
+        return Response({'error': 'Project not found'}, status=404)
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def test_execution_stats(request, project_id):
+    """
+    Возвращает статистику по выполнению тестов:
+    - среднее время выполнения
+    - количество выполненных тестов за день
+    - соотношение успешных/неуспешных прогонов
+    """
+    try:
+        project = Project.objects.get(id=project_id)
+        folders = Folder.objects.filter(project=project)
+        test_cases = TestCase.objects.filter(folder__in=folders)
+        
+        # Получаем все отчеты за последние 30 дней
+        now = timezone.now()
+        thirty_days_ago = now - timezone.timedelta(days=30)
+        
+        reports = TestReport.objects.filter(
+            test_case__in=test_cases,
+            execution_date__gte=thirty_days_ago
+        )
+        
+        # Считаем общую статистику
+        total_reports = reports.count()
+        if total_reports > 0:
+            avg_duration = reports.aggregate(Avg('duration'))['duration__avg'] or 0
+            success_rate = reports.filter(status='passed').count() / total_reports * 100
+        else:
+            avg_duration = 0
+            success_rate = 0
+            
+        # Создаем словарь для всех дней в диапазоне
+        daily_stats = {}
+        current_date = thirty_days_ago.date()
+        while current_date <= now.date():
+            daily_stats[current_date.isoformat()] = 0
+            current_date += timezone.timedelta(days=1)
+
+        # Считаем количество тестов по дням
+        for report in reports:
+            date = report.execution_date.date().isoformat()
+            daily_stats[date] += 1
+
+        # Формируем массивы для графика
+        dates = sorted(daily_stats.keys())
+        tests_per_day = [daily_stats[date] for date in dates]
+
+        return Response({
+            'avg_duration': round(avg_duration, 1),
+            'success_rate': round(success_rate, 1),
+            'total_reports': total_reports,
+            'dates': dates,
+            'tests_per_day': tests_per_day
+        })
+        
+    except Project.DoesNotExist:
         return Response({'error': 'Project not found'}, status=404)
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -963,15 +964,41 @@ def test_cases_creation_stats(request, project_id):
         
         # Статистика по авторам
         author_stats = test_cases.values(
-            'author__username'
+            'author_id'
         ).annotate(
             count=Count('id')
         ).order_by('-count')
         
+        print("Debug - Author stats:", author_stats)  # Отладочный вывод
+        
+        # Форматируем данные об авторах
+        formatted_author_stats = []
+        for stat in author_stats:
+            author_id = stat['author_id']
+            print(f"Debug - Processing author_id: {author_id}")  # Отладочный вывод
+            try:
+                if author_id:
+                    author = CustomUser.objects.get(id=author_id)
+                    print(f"Debug - Found author: {author.username}, {author.first_name}, {author.last_name}")  # Отладочный вывод
+                    author_name = f"{author.first_name} {author.last_name}"
+                    if not author_name.strip():  # Если имя пустое, используем username
+                        author_name = author.username
+                else:
+                    author_name = "Unknown"
+                    print("Debug - No author_id")  # Отладочный вывод
+            except CustomUser.DoesNotExist:
+                author_name = "Unknown"
+                print(f"Debug - Author with id {author_id} not found")  # Отладочный вывод
+                
+            formatted_author_stats.append({
+                'author': author_name,
+                'count': stat['count']
+            })
+        
         return Response({
             'daily': list(daily_stats),
             'cumulative': cumulative_stats,
-            'by_author': list(author_stats)
+            'by_author': formatted_author_stats
         })
     except Project.DoesNotExist:
         return Response({'error': 'Project not found'}, status=404)
@@ -1008,3 +1035,113 @@ def test_execution_stats(request, project_id):
         return Response({'error': 'Project not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+def tests_over_time(request, project_id):
+    """
+    Возвращает статистику успешности тестов по времени для указанного проекта
+    """
+    try:
+        # Получаем все тест-кейсы проекта через папки
+        project = Project.objects.get(id=project_id)
+        print(f"Project found: {project}")
+        
+        folders = Folder.objects.filter(project=project)
+        print(f"Found {folders.count()} folders")
+        
+        test_cases = TestCase.objects.filter(folder__in=folders)
+        print(f"Found {test_cases.count()} test cases")
+        
+        # Получаем все отчеты за последние 30 дней
+        now = timezone.now()
+        thirty_days_ago = now - timezone.timedelta(days=30)
+        print(f"Current time: {now}")
+        print(f"Thirty days ago: {thirty_days_ago}")
+
+        reports = TestReport.objects.filter(
+            test_case__in=test_cases,
+            execution_date__gte=thirty_days_ago
+        ).order_by('execution_date')
+        print(f"Found {reports.count()} reports in last 30 days")
+        
+        # Создаем словарь для всех дней в диапазоне
+        daily_stats = {}
+        current_date = thirty_days_ago.date()
+        while current_date <= now.date():
+            daily_stats[current_date.isoformat()] = {'total': 0, 'passed': 0}
+            current_date += timezone.timedelta(days=1)
+
+        # Заполняем статистику по имеющимся отчетам
+        for report in reports:
+            date = report.execution_date.date().isoformat()
+            daily_stats[date]['total'] += 1
+            if report.status == 'passed':
+                daily_stats[date]['passed'] += 1
+        
+        print(f"Daily stats: {daily_stats}")
+
+        # Формируем массивы для графика
+        dates = sorted(daily_stats.keys())
+        success_rates = [
+            round((daily_stats[date]['passed'] / daily_stats[date]['total']) * 100)
+            if daily_stats[date]['total'] > 0 else 0
+            for date in dates
+        ]
+        
+        result = {
+            'labels': dates,
+            'success_rate': success_rates
+        }
+        print(f"Returning result: {result}")
+        return Response(result)
+    except Project.DoesNotExist:
+        print("Project not found")
+        return Response({'error': 'Project not found'}, status=404)
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def test_flakiness(request, project_id):
+    """
+    Возвращает статистику по нестабильности тестов:
+    - количество падений для каждого теста
+    - общее количество запусков
+    """
+    try:
+        # Получаем все тест-кейсы проекта
+        test_cases = TestCase.objects.filter(folder__project_id=project_id)
+        
+        # Для каждого теста вычисляем статистику нестабильности
+        test_stats = []
+        for test in test_cases:
+            # Получаем все прогоны теста
+            runs = TestRun.objects.filter(test_case=test)
+            total_runs = runs.count()
+            
+            if total_runs >= 2:  # Нужно минимум 2 запуска
+                # Считаем количество падений
+                failed_runs = runs.filter(status='failed').count()
+                
+                if failed_runs > 0:  # Добавляем только тесты с падениями
+                    test_stats.append({
+                        'name': test.title,
+                        'failed_runs': failed_runs,
+                        'total_runs': total_runs
+                    })
+        
+        # Сортируем тесты по количеству падений (по убыванию)
+        test_stats.sort(key=lambda x: x['failed_runs'], reverse=True)
+        
+        # Возвращаем топ-10 тестов
+        return JsonResponse({
+            'tests': test_stats[:10]
+        })
+        
+    except Exception as e:
+        logger.error(f"Error calculating test flakiness: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)

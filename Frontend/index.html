@@ -3,38 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="dashboard">Test Management Dashboard</title>
-    <script src="js/theme-preloader.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/settings.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <title>FlowTest - Dashboard</title>
+    
+    <!-- Styles -->
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="js/calendarmini.js"></script>
-    <script src="js/menu.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        coral: {
-                            50: '#FFF0EB',
-                            100: '#FFE1D6',
-                            200: '#FFC3B3',
-                            300: '#FFA590',
-                            400: '#FF876D',
-                            500: '#FF7F50',
-                            600: '#FF6347',
-                            700: '#FF4733',
-                            800: '#FF2B20',
-                            900: '#FF0F0D',
-                        },
-                    },
-                },
-            },
-        }
-    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <style>
         .calendar-day {
             width: 40px;
@@ -73,6 +48,22 @@
         }
 
         .calendar-widget {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .chart-container {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .login-container {
             max-width: 400px;
             margin: 0 auto;
         }
@@ -126,15 +117,24 @@
                         <div class="flex items-center space-x-2">
                             <div class="w-48">
                                 <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
-                                    <option value="" selected data-i18n="allProjects"></option>
+                                    <option value="" selected data-i18n="allProjects">All Projects</option>
                                 </select>
                             </div>
-                            <!-- Create Project Button -->
-                            <button onclick="document.getElementById('createProjectModal').classList.remove('hidden')" class="p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400 focus:outline-none focus:ring-2 focus:ring-coral-500 rounded-lg">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </div>
+
+                        <!-- Notifications -->
+                        <div id="notifications-wrapper" class="relative">
+                            <button type="button" onclick="toggleNotifications()"
+                                    class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400">
+                                <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
+                                <span class="sr-only" data-i18n="notifications">Notifications</span>
                             </button>
+                            <div id="notificationList" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <!-- Notifications will be loaded here -->
+                            </div>
                         </div>
 
                         <!-- Calendar Button -->
@@ -144,14 +144,6 @@
                             </svg>
                         </button>
 
-                        <!-- Notifications -->
-                        <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400" onclick="toggleNotifications()">
-                            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                            </svg>
-                            <span class="sr-only" data-i18n="notifications">Notifications</span>
-                        </button>
                         <!-- User Menu -->
                         <div class="relative">
                             <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
@@ -177,95 +169,60 @@
             <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="totalTests">Total Tests</h3>
-                        <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">1,234</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="fromLastMonth">from last month</p>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="totalTests">Total Tests</h3>
+                        <p id="totalTests" class="text-3xl font-bold text-blue-600 dark:text-blue-400">-</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="successRate">Success Rate</h3>
-                        <p class="text-3xl font-bold text-green-600 dark:text-green-400">85%</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">+5% from last month</p>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="successRate">Success Rate</h3>
+                        <p id="successRate" class="text-3xl font-bold text-green-600 dark:text-green-400">-</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2" data-i18n="failedTests">Failed Tests</h3>
-                        <p class="text-3xl font-bold text-red-600 dark:text-red-400">185</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">-3% from last month</p>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="avgExecutionTime">Avg. Execution Time</h3>
+                        <p id="avgExecutionTime" class="text-3xl font-bold text-purple-600 dark:text-purple-400">-</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Success Rate Over Time -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testsOverTime">Total Tests Over Time</h2>
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="successRateOverTime">Success Rate Over Time</h2>
                         <div class="h-64">
-                            <canvas id="testsOverTime"></canvas>
+                            <canvas id="successRateOverTime"></canvas>
                         </div>
                     </div>
 
+                    <!-- Test Flakiness -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="resultsDistribution">Test Results Distribution</h2>
-                        <div class="h-64">
-                            <canvas id="resultsDistribution"></canvas>
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testFlakiness">Test Flakiness</h2>
+                        <div style="height: 300px;">
+                            <canvas id="testFlakiness"></canvas>
                         </div>
                     </div>
 
+                    <!-- Priority Distribution -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="executionTime">Test Execution Time</h2>
-                        <div class="h-64">
-                            <canvas id="executionTime"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="priorityDistribution">Test Priority Distribution</h2>
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="priorityDistribution">Priority Distribution</h2>
                         <div class="h-64">
                             <canvas id="priorityDistribution"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md md:col-span-2">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="categoryStatistics">Test Categories Statistics</h2>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="category">Category</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="totalTests">Total Tests</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="successRate">Success Rate</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="failureRate">Failure Rate</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" data-i18n="avgDuration">Avg. Duration</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="functional">Functional</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">450</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">70%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">30%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">2.5m</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="nonFunctional">Non-Functional</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">300</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">30%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">70%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">4.2m</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="integration">Integration</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">280</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">85%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">15%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">3.8m</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-i18n="security">Security</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">204</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">92%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">8%</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">5.1m</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <!-- Results Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="resultsDistribution">Results Distribution</h2>
+                        <div class="h-64">
+                            <canvas id="resultsDistribution"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Test Case Creation -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testCaseCreation">Test Case Creation</h2>
+                        <div class="h-64">
+                            <canvas id="testCaseCreation"></canvas>
                         </div>
                     </div>
                 </div>
@@ -274,13 +231,19 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/config.js"></script>
     <script src="js/translations.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/auth-interceptor.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/projects.js"></script>
+    <script src="js/dashboard-charts.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/user.js"></script>
-    <script src="js/projects.js"></script>
     <script src="js/init.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
