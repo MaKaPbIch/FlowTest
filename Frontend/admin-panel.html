@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowTest - Admin Panel</title>
+    
+    <!-- Styles -->
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        
+        /* Стили для вкладок */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-link.active {
+            border-bottom-color: #F97316;
+            color: #4B5563;
+        }
+        
+        .dark .tab-link.active {
+            color: #E5E7EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen sticky top-0">
+            <div class="p-4 sticky top-0">
+                <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8" data-i18n="companyLogo">
+                <nav class="space-y-2">
+                    <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-dashboard-line text-xl mr-3"></i>
+                        <span data-i18n="dashboard">Панель управления</span>
+                    </a>
+
+                    <a href="test-cases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-list-line text-xl mr-3"></i>
+                        <span data-i18n="testCases">Тест-кейсы</span>
+                    </a>
+
+                    <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-calendar-event-line text-xl mr-3"></i>
+                        <span data-i18n="events">События</span>
+                    </a>
+
+                    <a href="reports.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-chart-line text-xl mr-3"></i>
+                        <span data-i18n="reports">Отчеты</span>
+                    </a>
+                    
+                    <a href="admin-panel.html" class="flex items-center p-2 text-coral-600 dark:text-coral-400 rounded-lg bg-coral-50 dark:bg-gray-700 group">
+                        <i class="ri-settings-line text-xl mr-3"></i>
+                        <span data-i18n="adminPanel">Админ-панель</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="flex-1 bg-gray-50 dark:bg-gray-900">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="adminPanel">Admin Panel</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
+                                </div>
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <a href="admin-panel.html" id="adminPanelLink" class="hidden block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="adminPanel">Admin Panel</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6">
+                <!-- Admin Tabs -->
+                <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+                    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+                        <li class="mr-2">
+                            <a href="#" class="tab-link active inline-block p-4 border-b-2 border-coral-500 dark:border-coral-400 rounded-t-lg" data-tab="users" data-i18n="usersTab">Users</a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="#" class="tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" data-tab="roles" data-i18n="rolesTab">Roles</a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="#" class="tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" data-tab="permissions" data-i18n="permissionsTab">Permissions</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Users Tab Content -->
+                <div class="tab-content active" id="users-tab">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="userManagement">User Management</h2>
+                        <div class="flex space-x-2">
+                            <button id="createUserBtn" class="btn-primary px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="ri-user-line mr-2"></i>
+                                <span data-i18n="createUser">Создать пользователя</span>
+                            </button>
+                            <button id="addUserBtn" class="btn-secondary px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="ri-user-add-line mr-2"></i>
+                                <span data-i18n="addUser">Добавить пользователя</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="mb-6 flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                        <div class="flex-1 min-w-[300px]">
+                            <label for="userSearch" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="searchUser">Search Users</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="ri-search-line text-gray-400"></i>
+                                </div>
+                                <input type="text" id="userSearch" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Search by username, email, name...">
+                            </div>
+                        </div>
+                        <div class="w-48">
+                            <label for="roleFilter" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="filterByRole">Filter by Role</label>
+                            <select id="roleFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                <option value="" selected data-i18n="allRoles">All Roles</option>
+                                <!-- Roles will be populated here -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3" data-i18n="username">Username</th>
+                                    <th scope="col" class="px-6 py-3" data-i18n="fullName">Full Name</th>
+                                    <th scope="col" class="px-6 py-3" data-i18n="email">Email</th>
+                                    <th scope="col" class="px-6 py-3" data-i18n="role">Role</th>
+                                    <th scope="col" class="px-6 py-3" data-i18n="status">Status</th>
+                                    <th scope="col" class="px-6 py-3" data-i18n="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- User rows will be populated here -->
+                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <td class="px-6 py-4 text-center" colspan="6" data-i18n="loadingUsers">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Roles Tab Content -->
+                <div class="tab-content hidden" id="roles-tab">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="roleManagement">Role Management</h2>
+                        <button id="addRoleBtn" class="btn-primary px-4 py-2 rounded-lg inline-flex items-center">
+                            <i class="ri-add-line mr-2"></i>
+                            <span data-i18n="addRole">Add Role</span>
+                        </button>
+                    </div>
+
+                    <!-- Roles Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="rolesGrid">
+                        <!-- Role cards will be populated here -->
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex items-center justify-center">
+                            <span class="text-gray-500 dark:text-gray-400" data-i18n="loadingRoles">Loading roles...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permissions Tab Content -->
+                <div class="tab-content hidden" id="permissions-tab">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="permissionManagement">Permission Management</h2>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="mb-6 flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                        <div class="flex-1 min-w-[300px]">
+                            <label for="permissionSearch" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="searchPermission">Search Permissions</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="ri-search-line text-gray-400"></i>
+                                </div>
+                                <input type="text" id="permissionSearch" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Search by name or category...">
+                            </div>
+                        </div>
+                        <div class="w-48">
+                            <label for="categoryFilter" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="filterByCategory">Filter by Category</label>
+                            <select id="categoryFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                <option value="" selected data-i18n="allCategories">All Categories</option>
+                                <!-- Categories will be populated here -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Permissions Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="permissionsContainer">
+                        <!-- Permissions will be populated here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay with light blur only -->
+            <div class="fixed inset-0 backdrop-blur-md" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="userModalTitle" data-i18n="addNewUser">Add New User</h3>
+                    <form id="userForm" class="mt-4">
+                        <input type="hidden" id="userId" value="">
+                        
+                        <!-- Селектор для выбора существующего пользователя (отображается только в режиме добавления) -->
+                        <div id="existingUserSection" class="mb-4 hidden">
+                            <label for="existingUserSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="selectExistingUser">Выберите существующего пользователя</label>
+                            <select id="existingUserSelect" name="existing_user" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" data-i18n="selectUser">Выберите пользователя</option>
+                                <!-- Существующие пользователи будут добавлены здесь -->
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" data-i18n="existingUserHelp">Выберите пользователя из списка или введите данные вручную</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="userFormFields">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="username">Username</label>
+                                <input type="text" id="username" name="username" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                <div class="error-message"></div>
+                            </div>
+                            <div id="passwordField">
+                                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="password">Password</label>
+                                <input type="password" id="password" name="password" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 hidden" id="passwordHelpText" data-i18n="passwordEditHelp">Leave blank to keep current password</p>
+                            </div>
+                            <div>
+                                <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="firstName">First Name</label>
+                                <input type="text" id="firstName" name="first_name" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            </div>
+                            <div>
+                                <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="last_name" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            </div>
+                            <div>
+                                <label for="middleName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="middleName">Middle Name</label>
+                                <input type="text" id="middleName" name="middle_name" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="email">Email</label>
+                                <input type="email" id="email" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Например: user@example.com</p>
+                                <div class="error-message"></div>
+                            </div>
+                            <div>
+                                <label for="userRole" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="role">Role</label>
+                                <select id="userRole" name="role" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="" data-i18n="selectRole">Select Role</option>
+                                    <!-- Roles will be populated here -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="userStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="status">Status</label>
+                                <select id="userStatus" name="is_active" class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="true" data-i18n="active">Active</option>
+                                    <option value="false" data-i18n="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="saveUserBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-coral-600 text-base font-medium text-white hover:bg-coral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200" data-i18n="save">Save</button>
+                    <button type="button" id="cancelUserBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all duration-200" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Modal -->
+    <div id="permissionModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Removed gray background, light blur only -->
+            <div class="fixed inset-0 backdrop-blur-[2px] transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="permissionModalTitle" data-i18n="addNewPermission">Add New Permission</h3>
+                    <form id="permissionForm" class="mt-4">
+                        <input type="hidden" id="permissionId" value="">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="permissionName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="permissionName">Permission Name</label>
+                                <input type="text" id="permissionName" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            </div>
+                            <div>
+                                <label for="permissionCodename" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="permissionCodename">Codename</label>
+                                <input type="text" id="permissionCodename" name="codename" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" data-i18n="codenameHelp">Unique identifier for this permission (e.g., 'view_users')</p>
+                            </div>
+                            <div>
+                                <label for="permissionCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="category">Category</label>
+                                <select id="permissionCategory" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <option value="" data-i18n="selectCategory">Select Category</option>
+                                    <option value="user_management" data-i18n="categoryUserManagement">User Management</option>
+                                    <option value="test_management" data-i18n="categoryTestManagement">Test Management</option>
+                                    <option value="reports" data-i18n="categoryReports">Reports</option>
+                                    <option value="settings" data-i18n="categorySettings">Settings</option>
+                                    <option value="other" data-i18n="categoryOther">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="permissionDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
+                                <textarea id="permissionDescription" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="savePermissionBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-coral-600 text-base font-medium text-white hover:bg-coral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:ml-3 sm:w-auto sm:text-sm" data-i18n="save">Save</button>
+                    <button type="button" id="cancelPermissionBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Modal -->
+    <div id="roleModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Removed overlay background: no more gray -->
+            <div class="fixed inset-0 backdrop-blur-[2px] transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="roleModalTitle" data-i18n="addNewRole">Add New Role</h3>
+                    <form id="roleForm" class="mt-4">
+                        <input type="hidden" id="roleId" value="">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="roleName" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="roleName">Role Name</label>
+                                <input type="text" id="roleName" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            </div>
+                            <div>
+                                <label for="roleDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
+                                <textarea id="roleDescription" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="permissions">Permissions</label>
+                                    <div>
+                                        <button type="button" id="selectAllPermissions" class="text-sm text-coral-600 hover:text-coral-700 dark:text-coral-400 dark:hover:text-coral-300" data-i18n="selectAll">Select All</button>
+                                        <span class="text-gray-500 dark:text-gray-400 mx-2">|</span>
+                                        <button type="button" id="deselectAllPermissions" class="text-sm text-coral-600 hover:text-coral-700 dark:text-coral-400 dark:hover:text-coral-300" data-i18n="deselectAll">Deselect All</button>
+                                    </div>
+                                </div>
+                                <div class="mt-2 max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2">
+                                    <div id="rolePermissionsContainer" class="space-y-4">
+                                        <!-- Permissions will be populated here, grouped by category -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-4">
+                                <button type="button" id="saveRoleBtn" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm" data-i18n="save">
+                                    <i class="ri-save-line mr-1"></i> Сохранить
+                                </button>
+                                <button type="button" id="cancelRoleBtn" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-100 text-base font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:text-sm dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600" data-i18n="cancel">
+                                    <i class="ri-close-line mr-1"></i> Отмена
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Кнопки перенесены в форму выше -->
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Permissions Modal -->
+    <div id="rolePermissionsModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Removed gray background, light blur only -->
+            <div class="fixed inset-0 backdrop-blur-[2px] transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="rolePermissionsModalTitle">Управление разрешениями роли</h3>
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <button type="button" id="selectAllModalPermissions" class="text-sm text-coral-600 hover:text-coral-700 dark:text-coral-400 dark:hover:text-coral-300" data-i18n="selectAll">Выбрать все</button>
+                                <span class="text-gray-500 dark:text-gray-400 mx-2">|</span>
+                                <button type="button" id="deselectAllModalPermissions" class="text-sm text-coral-600 hover:text-coral-700 dark:text-coral-400 dark:hover:text-coral-300" data-i18n="deselectAll">Снять все</button>
+                            </div>
+                            <div class="mb-4">
+                                <input type="text" id="permissionsSearchInput" placeholder="Поиск разрешений..." class="px-3 py-2 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-coral-500 focus:border-coral-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="mt-2 max-h-80 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2">
+                            <div id="modalRolePermissionsContainer" class="space-y-4">
+                                <!-- Permissions will be populated here, grouped by category -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-6">
+                        <button type="button" id="saveRolePermissionsBtn" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm">
+                            <i class="ri-save-line mr-1"></i> Сохранить
+                        </button>
+                        <button type="button" id="cancelRolePermissionsBtn" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-100 text-base font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+                            <i class="ri-close-line mr-1"></i> Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Removed gray background, light blur only -->
+            <div class="fixed inset-0 backdrop-blur-[2px] transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-900">
+                            <i class="ri-delete-bin-line text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="deleteModalTitle" data-i18n="confirmDelete">Confirm Delete</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="deleteModalText">Are you sure you want to delete this item? This action cannot be undone.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="confirmDeleteBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" data-i18n="delete">Delete</button>
+                    <button type="button" id="cancelDeleteBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <script src="js/theme-preload.js"></script>
+    <script src="js/config.js"></script>
+    <script>
+        // Обработчик глобальных ошибок
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Global error handler:', message, source, lineno, colno, error);
+        };
+        
+        // Функция для отображения уведомления
+        window.showToast = function(message, type = 'info') {
+            // Создание элемента уведомления
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'} text-white`;
+            toast.textContent = message;
+            
+            // Добавление уведомления на страницу
+            document.body.appendChild(toast);
+            
+            // Автоматическое удаление уведомления через 3 секунды
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 500);
+            }, 3000);
+        };
+        
+        // Проверяем наличия конфигурации перед загрузкой i18n.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, загружен ли конфиг
+            if (typeof config === 'undefined') {
+                console.error('CONFIG ERROR: config object is not defined!');
+            } else {
+                console.log('CONFIG: Successfully loaded with API_BASE_URL =', config.API_BASE_URL);
+            }
+        });
+    </script>
+    <script>
+        // Загрузка локализации
+        async function loadLocalizationFiles() {
+            try {
+                const language = localStorage.getItem('language') || navigator.language.split('-')[0] || 'en';
+                console.log('Loading localization for language:', language);
+                
+                const response = await fetch(`locales/${language}.json`);
+                if (!response.ok) throw new Error(`Failed to load ${language}.json: ${response.status}`);
+                
+                const translations = await response.json();
+                // Проверяем наличие ключа companyLogo
+                if (!translations.companyLogo) {
+                    console.warn(`Missing 'companyLogo' key in ${language}.json, adding default value`);
+                    translations.companyLogo = language === 'ru' ? 'Логотип компании' : 
+                                               language === 'de' ? 'Firmenlogo' : 'Company Logo';
+                }
+                
+                window.translations = { [language]: translations };
+                console.log('Translations loaded successfully');
+                
+                // Создаем событие о загрузке переводов
+                window.translationsLoaded = true;
+                document.dispatchEvent(new CustomEvent('translations:loaded'));
+                
+                // Загружаем i18n.js динамически после загрузки переводов
+                loadScript('js/i18n.js').then(() => {
+                    console.log('i18n.js loaded successfully');
+                    // Инициализируем админ-панель после загрузки i18n.js
+                    if (typeof initAdminPanel === 'function') {
+                        console.log('Initializing admin panel...');
+                        initAdminPanel();
+                    } else {
+                        console.error('initAdminPanel function not found');
+                    }
+                }).catch(error => {
+                    console.error('Error loading i18n.js:', error);
+                });
+            } catch (error) {
+                console.error('Error loading localizations:', error);
+                // Загружаем стандартный набор переводов для критических элементов
+                window.translations = { 'en': {
+                    'adminPanel': 'Admin Panel',
+                    'usersTab': 'Users',
+                    'rolesTab': 'Roles', 
+                    'permissionsTab': 'Permissions',
+                    'companyLogo': 'Company Logo'
+                }};
+                
+                // Даже при ошибке загрузки создаем событие и загружаем i18n.js
+                window.translationsLoaded = true;
+                document.dispatchEvent(new CustomEvent('translations:loaded'));
+                loadScript('js/i18n.js').catch(error => {
+                    console.error('Failed to load i18n.js after localization error:', error);
+                });
+            }
+        }
+        
+        // Функция для динамической загрузки скриптов
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Вызываем функцию загрузки локализации
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalizationFiles();
+        });
+    </script>
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/admin-panel.js"></script>
+</body>
+</html>
