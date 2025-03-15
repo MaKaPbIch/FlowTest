@@ -1,0 +1,1 @@
+            // No charts to load - custom charts will be added by the user

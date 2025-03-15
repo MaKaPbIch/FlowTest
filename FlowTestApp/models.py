@@ -1,6 +1,8 @@
 from django.db import models
 from rest_framework.views import APIView
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser
+# Import Django's Permission as DjangoPermission to avoid naming conflict
+from django.contrib.auth.models import Permission as DjangoPermission
 from django.conf import settings
 from django.utils import timezone
 from urllib.parse import urlparse
@@ -11,6 +13,7 @@ from django.dispatch import receiver
 import threading
 from playwright.sync_api import sync_playwright
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,7 @@ class Folder(models.Model):
 
 class TestCase(models.Model):
     folder = models.ForeignKey(Folder, related_name='test_cases', on_delete=models.SET_NULL, null=True, blank=True)
+    project = models.ForeignKey(Project, related_name='test_cases', on_delete=models.CASCADE)
     title = models.CharField(max_length=255, default="Unnamed Test Case")
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -85,6 +89,7 @@ class TestCase(models.Model):
         null=True
     )
     automation_project = models.ForeignKey('AutomationProject', on_delete=models.SET_NULL, null=True, blank=True, related_name='test_cases')
+    tags = models.JSONField(blank=True, null=True, default=list)
 
     def __str__(self):
         return self.title
@@ -97,61 +102,111 @@ class TestRun(models.Model):
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Pending'),
         ('running', 'Running'),
-        ('success', 'Success'),
+        ('passed', 'Passed'),
         ('failed', 'Failed'),
-        ('error', 'Error')
-    ], default='pending')
+        ('error', 'Error'),
+        ('skipped', 'Skipped')
+    ])
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
-    duration = models.FloatField(null=True, help_text='Duration in seconds')
+    execution_time = models.FloatField(null=True)  # в секундах
     error_message = models.TextField(null=True, blank=True)
-    log_output = models.TextField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if self.started_at and self.finished_at and not self.duration:
-            self.duration = (self.finished_at - self.started_at).total_seconds()
-        super().save(*args, **kwargs)
+    output = models.TextField(null=True, blank=True)
+    executor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"Test Run {self.id} - {self.test_case.title if self.test_case else 'No test case'} ({self.status})"
+        return f"{self.test_case} - {self.status}"
+
+    def save(self, *args, **kwargs):
+        if self.started_at and self.finished_at and not self.execution_time:
+            self.execution_time = (self.finished_at - self.started_at).total_seconds()
+        super().save(*args, **kwargs)
+
+class Permission(models.Model):
+    """
+    Модель для хранения прав доступа
+    """
+    CATEGORY_CHOICES = [
+        ('user_management', 'Управление пользователями'),
+        ('project_management', 'Управление проектами'),
+        ('test_management', 'Управление тестами'),
+        ('report_management', 'Управление отчетами'),
+        ('event_management', 'Управление событиями'),
+        ('automation_management', 'Управление автоматизацией'),
+    ]
+    
+    name = models.CharField(max_length=100, unique=True)
+    codename = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='test_management')
+    
+    def __str__(self):
+        return self.name
+        
+    class Meta:
+        ordering = ['category', 'name']
 
 class Role(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    permissions = models.ManyToManyField(Permission, related_name='roles', blank=True)
-
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    permissions = models.ManyToManyField(Permission, related_name="roles", blank=True)
+    is_admin_role = models.BooleanField(default=False, help_text="Администраторская роль с полным доступом")
+    
     def __str__(self):
         return self.name
 
+def avatar_upload_path(instance, filename):
+    """
+    Функция для определения пути загрузки аватара
+    """
+    # Get the original file extension
+    ext = os.path.splitext(filename)[1].lower()
+    # Generate a filename that won't be hex-encoded
+    return f'avatars/{instance.id}{ext}'
+
 class CustomUser(AbstractUser):
+    """
+    Расширенная модель пользователя
+    """
     LANGUAGE_CHOICES = [
         ('en', 'English'),
-        ('ru', 'Russian'),
-        ('de', 'German'),
+        ('ru', 'Русский'),
     ]
+    
     THEME_CHOICES = [
         ('light', 'Light'),
         ('dark', 'Dark'),
     ]
-
-    middle_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Отчество", default="")
-    first_name = models.CharField(max_length=150, blank=False, verbose_name="Имя", default="Имя")
-    last_name = models.CharField(max_length=150, blank=False, verbose_name="Фамилия", default="Фамилия")
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
+    
+    middle_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Отчество")
+    first_name = models.CharField(max_length=150, blank=False, verbose_name="Имя")
+    last_name = models.CharField(max_length=150, blank=False, verbose_name="Фамилия")
+    language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='en')
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='light')
     phone_number = models.CharField(max_length=15, blank=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    theme = models.CharField(max_length=5, choices=THEME_CHOICES, default='light')
+    avatar = models.ImageField(
+        upload_to=avatar_upload_path,
+        null=True,
+        blank=True,
+        max_length=255
+    )
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
-
+    
     def save(self, *args, **kwargs):
-        # Save user first to ensure `id` is generated
+        if self.avatar:
+            # Проверяем размер файла
+            if self.avatar.size > 2 * 1024 * 1024:  # 2MB
+                raise ValidationError('Avatar file too large ( > 2MB )')
+            
+            # Проверяем расширение файла
+            ext = os.path.splitext(self.avatar.name)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
+                raise ValidationError('Unsupported file extension')
+                
         super().save(*args, **kwargs)
-        # Automatically assign permissions from role if a role is assigned
-        if self.role:
-            self.user_permissions.set(self.role.permissions.all())
-
+    
     def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
-
+        return self.username
 
 class SchedulerEvent(models.Model):
     EVENT_TYPE_CHOICES = [
@@ -275,6 +330,26 @@ class TestEvent(models.Model):
             models.Index(fields=['severity'])
         ]
 
+class ReportTemplate(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Флаг "мягкого удаления" - если True, шаблон считается удаленным
+    is_deleted = models.BooleanField(default=False)
+    
+    # Конфигурация отчета в JSON формате
+    configuration = models.JSONField(default=dict)
+    
+    class Meta:
+        ordering = ['-updated_at']
+        
+    def __str__(self):
+        return f"{self.name} - {self.project.name}"
+
 class AutomationProject(models.Model):
     name = models.CharField(max_length=100)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='automation_projects', null=True, blank=True)
@@ -360,3 +435,35 @@ class TestSchedule(models.Model):
 
     def __str__(self):
         return f"Schedule for {self.project.name} at {self.schedule_time}"
+
+class CustomChart(models.Model):
+    CHART_TYPES = [
+        ('line', 'Line Chart'),
+        ('bar', 'Bar Chart'),
+        ('pie', 'Pie Chart'),
+        ('doughnut', 'Doughnut Chart')
+    ]
+    
+    DATA_SOURCES = [
+        ('test_status', 'Test Status'),
+        ('user_activity', 'User Activity'),
+        ('daily_trends', 'Daily Trends'),
+        ('custom_query', 'Custom Query')
+    ]
+    
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    chart_type = models.CharField(max_length=50, choices=CHART_TYPES)
+    data_source = models.CharField(max_length=50, choices=DATA_SOURCES)
+    configuration = models.JSONField(default=dict, help_text='Chart-specific configuration')
+    custom_query = models.TextField(blank=True, null=True, help_text='SQL query for custom data source')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='custom_charts')
+    
+    class Meta:
+        ordering = ['-updated_at']
+        
+    def __str__(self):
+        return self.name

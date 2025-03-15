@@ -6,14 +6,23 @@ window.Calendar = {
     events: {},
 
     updateCalendarHeader() {
-        const monthNames = [
-            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-        ];
+        const monthNames = {
+            ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            de: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
+        };
+        
+        // Определяем текущий язык
+        let currentLang = 'en';
+        if (window.i18n && window.i18n.currentLanguage) {
+            currentLang = window.i18n.currentLanguage;
+        }
         
         const headerMonth = document.querySelector('.calendar-current-month');
         if (headerMonth) {
-            headerMonth.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
+            // Используем месяцы для текущего языка или английский по умолчанию
+            const months = monthNames[currentLang] || monthNames['en'];
+            headerMonth.textContent = `${months[this.currentMonth]} ${this.currentYear}`;
         }
     },
 

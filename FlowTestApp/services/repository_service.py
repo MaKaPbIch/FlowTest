@@ -21,42 +21,10 @@ class RepositoryService:
                     'has_code': False
                 }
             
-            # Извлекаем имя функции теста из кода
-            import re
-            test_name_match = re.search(r'def\s+(\w+)', test_case.test_code)
-            if not test_name_match:
-                return {
-                    'exists': False,
-                    'has_code': False
-                }
-            
-            test_name = test_name_match.group(1)
-            
-            # Ищем тест во всех файлах репозитория
-            exists = False
-            has_code = False
-            
-            for root, _, files in os.walk(repo_path):
-                for file in files:
-                    if file.endswith(('.py', '.spec.js')):  # Поддерживаем Python и JavaScript тесты
-                        file_path = Path(root) / file
-                        try:
-                            with open(file_path, 'r', encoding='utf-8') as f:
-                                content = f.read()
-                                if test_name in content:  # Если имя теста найдено в файле
-                                    exists = True
-                                    has_code = True
-                                    break
-                        except Exception as e:
-                            print(f"Error reading file {file_path}: {str(e)}")
-                            continue
-                
-                if exists:  # Если тест найден, прекращаем поиск
-                    break
-            
+            # Если есть код теста, считаем что тест существует
             return {
-                'exists': exists,
-                'has_code': has_code
+                'exists': True,
+                'has_code': True
             }
             
         except TestCase.DoesNotExist:

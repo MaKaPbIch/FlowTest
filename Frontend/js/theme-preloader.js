@@ -12,4 +12,4 @@
     const theme = getPreloadTheme();
     document.documentElement.classList.add(theme);
     if (document.body) document.body.classList.add(theme);
-})(); 
+})();

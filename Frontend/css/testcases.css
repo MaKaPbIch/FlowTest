@@ -210,6 +210,32 @@ select option:hover {
 
 /* Folder Tree Styles */
 
+/* Custom styles for folder toggle icons */
+.folder-item .fa-chevron-right {
+    color: #6B7280;
+    transition: transform 0.3s ease;
+}
+
+.folder-item .rotate-90 {
+    transform: rotate(90deg);
+}
+
+/* Add a subtle highlight to the toggle area on hover */
+.folder-item .w-6:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+}
+
+/* Make folder items more distinct */
+.folder-item > div:first-child {
+    border-left: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.folder-item > div:first-child:hover {
+    border-left-color: #3B82F6;
+}
+
 /* Rotation styles */
 .rotate-90 {
     transform: rotate(90deg);
@@ -221,4 +247,185 @@ select option:hover {
 
 .folder-item .rotate-90 {
     transform: rotate(90deg);
+}
+
+/* Test Execution Panel */
+.test-execution-panel {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.test-status {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.test-error {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 4px;
+    color: #c62828;
+}
+
+.test-output {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Test Status Colors */
+.status-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.status-running {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.status-info {
+    background-color: #f3e5f5;
+    color: #6a1b9a;
+}
+
+/* Test Case Content */
+.test-case-content {
+    padding: 20px;
+}
+
+.test-case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.test-case-title {
+    margin: 0;
+    font-size: 24px;
+}
+
+.test-case-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.test-case-info {
+    margin-bottom: 20px;
+}
+
+.info-row {
+    margin-bottom: 10px;
+}
+
+.info-row .label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.test-code-container {
+    margin-top: 20px;
+}
+
+.test-code-container pre {
+    margin: 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+/* Стили для уведомлений */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 4px;
+    color: white;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success {
+    background-color: #4caf50;
+}
+
+.toast-error {
+    background-color: #f44336;
+}
+
+.toast-info {
+    background-color: #2196f3;
+}
+
+/* Button styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #FF7F50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #FF6347;
+}
+
+.btn-secondary {
+    background-color: #E5E7EB;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background-color: #D1D5DB;
+}
+
+.btn-danger {
+    background-color: #FEE2E2;
+    color: #DC2626;
+}
+
+.btn-danger:hover {
+    background-color: #FCA5A5;
+}
+
+.run-test-btn {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }

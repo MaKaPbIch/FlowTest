@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     try {
+        // Проверяем, есть ли действующий токен
+        const token = localStorage.getItem('access');
+        if (token) {
+            window.location.href = '/index.html';
+            return;
+        }
+
         // Initialize i18n
         i18n.init();
         
@@ -30,10 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     const data = await login(username, password);
                     if (data && data.access) {
-                        // Даем время на сохранение токена
-                        setTimeout(() => {
-                            window.location.href = '/index.html';
-                        }, 100);
+                        window.location.href = '/index.html';
                     }
                 } catch (error) {
                     console.error('Login error:', error);

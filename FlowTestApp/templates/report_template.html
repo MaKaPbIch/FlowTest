@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report.name|default:"Отчет о тестировании" }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .report-header h1 {
+            font-size: 24px;
+            color: #444;
+            margin-bottom: 10px;
+        }
+        
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .metrics-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            width: 30%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card h3 {
+            margin-top: 0;
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .metric-trend {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .metric-trend.positive {
+            color: #10B981;
+        }
+        
+        .metric-trend.negative {
+            color: #EF4444;
+        }
+        
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 48%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 15px;
+        }
+        
+        .chart-image {
+            width: 100%;
+            height: auto;
+        }
+        
+        .table-container {
+            margin-bottom: 30px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background-color: #f0f0f0;
+            text-align: left;
+            padding: 10px;
+            font-size: 14px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-passed {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-failed {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .status-skipped {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .report-footer {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        @media print {
+            .container {
+                max-width: 100%;
+                padding: 10px;
+            }
+            
+            .chart-container {
+                width: 100%;
+                page-break-inside: avoid;
+            }
+            
+            .metric-card {
+                page-break-inside: avoid;
+            }
+            
+            @page {
+                margin: 1cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="report-header">
+            <h1>{{ report.name|default:"Отчет о тестировании" }}</h1>
+            <div class="report-meta">
+                <div>Проект: {{ preview.project.name|default:project_name }}</div>
+                <div>Период: {{ start_date|date:"d.m.Y"|default:report.start_date|date:"d.m.Y" }} - {{ end_date|date:"d.m.Y"|default:report.end_date|date:"d.m.Y" }}</div>
+            </div>
+        </div>
+        
+        <!-- Metrics Section -->
+        <div class="metrics-container">
+            <div class="metric-card">
+                <h3>Всего тестов</h3>
+                <div class="metric-value">{{ total_tests|default:preview.metrics.totalTests.value|default:"0" }}</div>
+                {% if preview.metrics.totalTests.trend > 0 %}
+                <div class="metric-trend positive">↑ {{ preview.metrics.totalTests.trend|floatformat:1 }}% от прошлого периода</div>
+                {% elif preview.metrics.totalTests.trend < 0 %}
+                <div class="metric-trend negative">↓ {{ preview.metrics.totalTests.trend|floatformat:1 }}% от прошлого периода</div>
+                {% endif %}
+            </div>
+            
+            <div class="metric-card">
+                <h3>Успешно выполнено</h3>
+                <div class="metric-value">{{ passed_tests|default:preview.metrics.successRate.value|default:"0" }}%</div>
+                {% if preview.metrics.successRate.trend > 0 %}
+                <div class="metric-trend positive">↑ {{ preview.metrics.successRate.trend|floatformat:1 }}% от прошлого периода</div>
+                {% elif preview.metrics.successRate.trend < 0 %}
+                <div class="metric-trend negative">↓ {{ preview.metrics.successRate.trend|floatformat:1 }}% от прошлого периода</div>
+                {% endif %}
+            </div>
+            
+            <div class="metric-card">
+                <h3>Среднее время выполнения</h3>
+                <div class="metric-value">{{ average_duration|default:preview.metrics.averageTime.value|default:"0s" }}</div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        {% if charts_as_images or preview.charts %}
+        <div class="charts-container">
+            {% if charts_as_images.execution_trends or preview.charts.executionTrend %}
+            <div class="chart-container">
+                <h3>Тренд выполнения тестов</h3>
+                {% if charts_as_images.execution_trends %}
+                <img src="{{ charts_as_images.execution_trends }}" alt="График выполнения тестов" class="chart-image">
+                {% else %}
+                <div style="background-color: #eee; padding: 50px; text-align: center; color: #999;">
+                    Изображение графика недоступно
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if charts_as_images.status_distribution or preview.charts.statusDistribution %}
+            <div class="chart-container">
+                <h3>Распределение статусов</h3>
+                {% if charts_as_images.status_distribution %}
+                <img src="{{ charts_as_images.status_distribution }}" alt="График распределения статусов" class="chart-image">
+                {% else %}
+                <div style="background-color: #eee; padding: 50px; text-align: center; color: #999;">
+                    Изображение графика недоступно
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Test Results Table -->
+        <div class="table-container">
+            <h3>Результаты выполнения тестов</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Тест-кейс</th>
+                        <th>Статус</th>
+                        <th>Длительность</th>
+                        <th>Дата запуска</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in test_runs %}
+                    <tr>
+                        <td>{{ test.test_case.name|default:test.test_case }}</td>
+                        <td>
+                            <span class="status-badge 
+                                {% if test.status == 'passed' %}status-passed
+                                {% elif test.status == 'failed' %}status-failed
+                                {% elif test.status == 'skipped' %}status-skipped{% endif %}">
+                                {% if test.status == 'passed' %}Успешно
+                                {% elif test.status == 'failed' %}Ошибка
+                                {% elif test.status == 'skipped' %}Пропущено
+                                {% else %}{{ test.status }}{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ test.duration|floatformat:1 }}s</td>
+                        <td>{{ test.started_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Нет данных о запусках тестов</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="report-footer">
+            <div>Отчет сгенерирован: {{ generated_at|date:"d.m.Y H:i" }}</div>
+            <div>FlowTest Report Generator</div>
+        </div>
+    </div>
+</body>
+</html>

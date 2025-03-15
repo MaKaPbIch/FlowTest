@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="testcases">Test Cases</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            400: '#FF7F50',
+                            500: '#FF6347',
+                            600: '#FF4500',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Core dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-interceptor.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/testcases.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <link rel="stylesheet" href="css/testcases.css">
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
+        <!-- Tree Structure Panel -->
+        <div id="testCaseTree" class="w-1/4 bg-white dark:bg-gray-800 px-4 pt-6 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen sticky top-0">
+            <div class="flex-1 flex flex-col">
+                <div class="space-y-3 pr-4 flex-1 overflow-y-auto" style="max-height: calc(100vh - 140px);">
+                    <!-- Search Section -->
+                    <div class="relative mb-1">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="searchInput"
+                               data-i18n-placeholder="search_folders_and_tests" 
+                               placeholder="Search folders and test cases..." 
+                               class="w-full pl-10 pr-10 py-2.5 rounded-lg text-sm bg-gray-50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-all duration-300 dark:bg-gray-700 dark:text-gray-200" 
+                               aria-label="Search folders and test cases">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <button id="clearSearch" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hidden p-1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Search Results Counter -->
+                    <div id="searchResultsCounter" class="text-xs text-gray-500 dark:text-gray-400 mb-2 hidden">
+                        <span id="resultCount">0</span> <span data-i18n="search_results">results found</span>
+                    </div>
+
+                    <!-- Collapsible Filter Panel -->
+                    <div class="mb-4">
+                        <!-- Filter Toggle Button -->
+                        <button id="toggleFilters" class="flex items-center justify-between w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300">
+                            <span class="flex items-center">
+                                <i class="fas fa-sliders-h mr-2 text-green-500"></i>
+                                <span data-i18n="filters_and_sorting">Filters & Sorting</span>
+                            </span>
+                            <i id="filterArrow" class="fas fa-chevron-down transition-transform duration-300"></i>
+                        </button>
+                        
+                        <!-- Expandable Filter Content -->
+                        <div id="filterPanel" class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mt-2 p-4 hidden">
+                            <!-- Sorting Options -->
+                            <div class="mb-4">
+                                <h3 class="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                    <i class="fas fa-sort-amount-down mr-2 text-purple-500"></i>
+                                    <span data-i18n="sorting">Sorting</span>
+                                </h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="relative">
+                                        <select id="sortField" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="name" data-i18n="name">Name</option>
+                                            <option value="date" data-i18n="date">Date</option>
+                                            <option value="priority" data-i18n="priority">Priority</option>
+                                            <option value="status" data-i18n="status">Status</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <select id="sortOrder" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="asc" data-i18n="ascending">Ascending</option>
+                                            <option value="desc" data-i18n="descending">Descending</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filter Options -->
+                            <div>
+                                <h3 class="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                    <i class="fas fa-filter mr-2 text-blue-500"></i>
+                                    <span data-i18n="filters">Filters</span>
+                                </h3>
+                                <div class="grid grid-cols-2 gap-x-2 gap-y-3">
+                                    <!-- Date Filter -->
+                                    <div>
+                                        <label for="dateFilter" class="block text-xs text-gray-600 dark:text-gray-400 mb-1" data-i18n="date_created">Date Created</label>
+                                        <select id="dateFilter" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="all" data-i18n="all_time">All Time</option>
+                                            <option value="today" data-i18n="today">Today</option>
+                                            <option value="week" data-i18n="this_week">This Week</option>
+                                            <option value="month" data-i18n="this_month">This Month</option>
+                                            <option value="custom" data-i18n="custom_range">Custom Range</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Folder Type -->
+                                    <div>
+                                        <label for="folderTypeFilter" class="block text-xs text-gray-600 dark:text-gray-400 mb-1" data-i18n="folder_type">Folder Type</label>
+                                        <select id="folderTypeFilter" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="all" data-i18n="all_folders">All Folders</option>
+                                            <option value="root" data-i18n="root_folders">Root Folders</option>
+                                            <option value="sub" data-i18n="subfolders">Subfolders</option>
+                                            <option value="empty" data-i18n="empty_folders">Empty Folders</option>
+                                            <option value="with_tests" data-i18n="with_tests">With Tests</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Created By -->
+                                    <div>
+                                        <label for="authorFilter" class="block text-xs text-gray-600 dark:text-gray-400 mb-1" data-i18n="created_by">Created By</label>
+                                        <select id="authorFilter" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="all" data-i18n="all_users">All Users</option>
+                                            <option value="me" data-i18n="me">Me</option>
+                                            <!-- Dynamic user list would be populated here -->
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Status Filter -->
+                                    <div>
+                                        <label for="statusFilter" class="block text-xs text-gray-600 dark:text-gray-400 mb-1" data-i18n="status">Status</label>
+                                        <select id="statusFilter" class="w-full px-3 py-2 rounded-lg text-xs border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm transition-all duration-300 dark:bg-gray-800 dark:text-gray-200">
+                                            <option value="all" data-i18n="all_statuses">All Statuses</option>
+                                            <option value="active" data-i18n="active">Active</option>
+                                            <option value="archived" data-i18n="archived">Archived</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Filter Action Buttons -->
+                                <div class="flex justify-end mt-4 space-x-2">
+                                    <button id="resetFilters" class="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                        <i class="fas fa-undo mr-1"></i>
+                                        <span data-i18n="reset">Reset</span>
+                                    </button>
+                                    <button id="applyFilters" class="px-3 py-1.5 text-xs bg-[#FF7F50] text-white rounded-lg hover:bg-[#FF6347] transition-colors">
+                                        <i class="fas fa-check mr-1"></i>
+                                        <span data-i18n="apply">Apply</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme Toggle and Create Root Folder Buttons -->
+                    <div class="flex space-x-2">
+                        <button onclick="window.testCaseManager.createFolder()" class="flex-1 px-4 py-2.5 bg-[#FF7F50] text-white rounded-xl hover:bg-[#FF6347] transition-colors duration-300 flex items-center justify-center space-x-2">
+                            <i class="fas fa-folder-plus"></i>
+                            <span data-i18n="create_root_folder">Create Root Folder</span>
+                        </button>
+                    </div>
+
+                    <!-- Tree Structure -->
+                    <div class="space-y-2" role="tree" aria-label="Folder structure" id="folderTree">
+                        <!-- Tree items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Bottom Section with Back Button -->
+                <div class="absolute bottom-4 left-4 right-4">
+                    <a href="index.html" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center space-x-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span data-i18n="back">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="testCases">Test Cases</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
+                        <!-- Project Selector -->
+                        <div class="flex items-center space-x-2">
+                            <div class="w-48">
+                                <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                    <option value="" selected data-i18n="allProjects">All Projects</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Notifications -->
+                        <div id="notifications-wrapper" class="relative">
+                            <button type="button" onclick="toggleNotifications()"
+                                    class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400">
+                                <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <span class="sr-only" data-i18n="notifications">Notifications</span>
+                            </button>
+                            <div id="notificationList" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Calendar Button -->
+                        <button id="calendarButton" aria-label="Schedule new event" class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-600 active:scale-95 group-hover:rotate-3" data-tooltip="Click to add new event">
+                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2"></path>
+                            </svg>
+                        </button>
+
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
+                                </div>
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="notification-root" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg py-4 z-50"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Test Case Info Panel -->
+            <div id="testCaseInfoContainer" class="p-6">
+                <div id="testCaseTemplate">
+                    <!-- Empty state -->
+                    <div id="emptyState" class="flex flex-col items-center justify-center h-full p-8">
+                        <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-lg" data-i18n="select_test_case">Select a test case to view details</p>
+                    </div>
+
+                    <!-- Test case information -->
+                    <div id="testCaseInfo" class="hidden">
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                            <div class="p-8">
+                                <div class="flex justify-between mb-4 text-sm text-gray-500">
+                                    <span>Created: <span class="created-at">Select a test case</span></span>
+                                    <span>Last Modified: <span class="updated-at">-</span></span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center space-x-4 flex-grow">
+                                        <input type="text" class="test-case-title text-2xl font-bold text-gray-800 border-b-2 border-transparent focus:border-blue-500 focus:outline-none bg-transparent" value="Select a test case" readonly>
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button class="edit-test-btn px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Edit
+                                        </button>
+                                        <button class="delete-test-btn px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-6 mb-6">
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium text-gray-700">Platform</label>
+                                            <select id="platform" class="w-full p-2 rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-200 focus:outline-none" disabled>
+                                                <option value="web" class="bg-purple-50 text-purple-600">Web Application</option>
+                                                <option value="android" class="bg-green-50 text-green-600">Android</option>
+                                                <option value="ios" class="bg-blue-50 text-blue-600">iOS</option>
+                                                <option value="desktop" class="bg-orange-50 text-orange-600">Desktop</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium text-gray-700">Priority</label>
+                                            <select id="priority" class="w-full p-2 rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-200 focus:outline-none" disabled>
+                                                <option value="high" class="bg-red-50 text-red-600">High Priority</option>
+                                                <option value="medium" class="bg-yellow-50 text-yellow-600">Medium Priority</option>
+                                                <option value="low" class="bg-green-50 text-green-600">Low Priority</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium text-gray-700">Estimated Time (minutes)</label>
+                                            <input id="estimatedTime" type="number" class="w-full p-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 focus:outline-none" value="30" readonly>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-sm font-medium text-gray-700">Status</label>
+                                            <select id="testType" class="w-full p-2 rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-200 focus:outline-none" disabled>
+                                                <option value="automated" class="bg-blue-50 text-blue-600">Automated</option>
+                                                <option value="manual" class="bg-gray-50 text-gray-600">Manual</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="text-sm font-medium text-gray-700 mb-2 block">Tags</label>
+                                    <div id="tagsContainer" class="flex flex-wrap gap-2">
+                                        <!-- Теги будут добавлены динамически -->
+                                        <button class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 edit-action-button hidden">+ Add Tag</button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-semibold text-gray-700">Description</h3>
+                                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" onclick="document.getElementById('fullDescription').classList.toggle('hidden')">
+                                            Show More
+                                        </button>
+                                    </div>
+                                    <textarea id="description" class="w-full p-3 bg-white rounded-lg shadow-inner border-0 focus:ring-2 focus:ring-blue-200" rows="2" readonly></textarea>
+                                </div>
+
+                                <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-semibold text-gray-700">Code</h3>
+                                        <div class="flex space-x-2">
+                                            <select class="text-sm border border-gray-200 rounded-md px-2 py-1" disabled>
+                                                <option>Python</option>
+                                                <option>JavaScript</option>
+                                                <option>Java</option>
+                                                <option>C#</option>
+                                            </select>
+                                            <button onclick="testCaseManager.copyCode()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Copy</button>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-900 rounded-lg p-4 font-mono">
+                                        <pre><code id="testCode" class="language-python text-green-400 text-sm overflow-x-auto whitespace-pre-wrap"></code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="font-semibold text-gray-700">Steps and Expected Results</h3>
+                                        <button onclick="testCaseManager.addStep()" class="px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 edit-action-button hidden">
+                                            Add Step
+                                        </button>
+                                    </div>
+                                    <div id="stepsContainer" class="space-y-4">
+                                        <!-- Шаги будут добавлены динамически -->
+                                    </div>
+                                </div>
+
+                                <div class="border-t pt-6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <span class="px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-600">Last Run: Passed</span>
+                                            <span class="text-sm text-gray-500">2 hours ago</span>
+                                        </div>
+                                        <div class="space-x-3">
+                                            <button onclick="testCaseManager.saveChanges()" class="hidden px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transform transition hover:scale-105 shadow-md">
+                                                Save Changes
+                                            </button>
+                                            <button onclick="testCaseManager.runTest()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transform transition hover:scale-105 shadow-md">
+                                                Run Test
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/theme.js"></script>
+    <script src="js/test-execution.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <script>
+        // Project handling
+        document.addEventListener('DOMContentLoaded', async function() {
+            const projectSelector = document.getElementById('projectSelector');
+            
+            // Load projects
+            try {
+                const response = await fetchWithAuth('/projects/');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch projects');
+                }
+                
+                const projects = await response.json();
+                console.log('Loaded projects:', projects);
+                
+                // Get saved project from localStorage
+                const savedProjectId = localStorage.getItem('selectedProject');
+                console.log('Saved project ID:', savedProjectId);
+                
+                // Clear existing options except "All Projects"
+                while (projectSelector.options.length > 1) {
+                    projectSelector.remove(1);
+                }
+                
+                // Add projects to selector
+                projects.forEach(project => {
+                    const option = new Option(project.name, project.id);
+                    projectSelector.add(option);
+                    
+                    // Select saved project if it exists
+                    if (savedProjectId && project.id === parseInt(savedProjectId)) {
+                        option.selected = true;
+                    }
+                });
+
+                // Initialize test cases if we have a selected project
+                if (savedProjectId) {
+                    await testCaseManager.fetchFoldersAndTestCases();
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showNotification('Error loading projects. Please try again.', 'error');
+            }
+            
+            // Save selected project and reload test cases
+            projectSelector.addEventListener('change', async function() {
+                const selectedProject = this.value;
+                if (selectedProject) {
+                    localStorage.setItem('selectedProject', selectedProject);
+                    await testCaseManager.fetchFoldersAndTestCases();
+                } else {
+                    localStorage.removeItem('selectedProject');
+                    const folderTree = document.getElementById('folderTree');
+                    if (folderTree) {
+                        folderTree.innerHTML = '<div class="text-gray-500 text-center p-4">Please select a project</div>';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

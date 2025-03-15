@@ -5,177 +5,270 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="events">Event Calendar</title>
     <script src="js/theme-preloader.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        coral: {
-                            400: '#FF7F50',
-                            500: '#FF6347',
-                            600: '#FF4500',
-                        },
-                    },
-                },
-            },
-        }
-    </script>
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="css/calendar.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="js/calendar.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/theme-manager.js"></script>
-    <script src="js/settings.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen sticky top-0">
-            <div class="p-4">
-                <a href="index.html">
-                    <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8">
-                </a>
+            <div class="p-4 sticky top-0">
+                <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8" data-i18n="companyLogo">
                 <nav class="space-y-2">
                     <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        <span data-i18n="dashboard">Dashboard</span>
+                        <i class="ri-dashboard-line text-xl mr-3"></i>
+                        <span data-i18n="dashboard">Панель управления</span>
                     </a>
-                    <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <span data-i18n="testCases">Test Cases</span>
+
+                    <a href="test-cases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-list-line text-xl mr-3"></i>
+                        <span data-i18n="testCases">Тест-кейсы</span>
                     </a>
-                    <a href="#" class="flex items-center p-2 text-coral-600 dark:text-coral-400 rounded-lg bg-coral-50 dark:bg-gray-700 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <span data-i18n="event_calendar">Event Calendar</span>
+
+                    <a href="events.html" class="flex items-center p-2 text-coral-600 dark:text-coral-400 rounded-lg bg-coral-50 dark:bg-gray-700 group">
+                        <i class="ri-calendar-event-line text-xl mr-3"></i>
+                        <span data-i18n="events">События</span>
                     </a>
-                    <a href="#" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span data-i18n="testRuns">Test Runs</span>
+
+                    <a href="reports.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-chart-line text-xl mr-3"></i>
+                        <span data-i18n="reports">Отчеты</span>
                     </a>
                 </nav>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <div class="flex-1">
-            <div class="flex max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-6 h-full">
-                <!-- Calendar Section -->
-                <div class="flex-grow h-full">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-full flex flex-col">
-                        <div class="calendar">
-                            <div class="calendar-header">
-                                <button class="calendar-nav-btn" onclick="previousMonth()">&lt;</button>
-                                <h2 class="calendar-current-month"></h2>
-                                <button class="calendar-nav-btn" onclick="nextMonth()">&gt;</button>
+        <div class="flex-1 bg-gray-50 dark:bg-gray-900">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="event_calendar">Event Calendar</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
+                        <!-- Notifications -->
+                        <div id="notifications-wrapper" class="relative">
+                            <button type="button" onclick="toggleNotifications()"
+                                    class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400">
+                                <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
+                                <i class="ri-notification-3-line text-xl"></i>
+                                <span class="sr-only" data-i18n="notifications">Notifications</span>
+                            </button>
+                            <div id="notificationList" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <!-- Notifications will be loaded here -->
                             </div>
-                            <div class="calendar-weekdays">
-                                <div>Вс</div>
-                                <div>Пн</div>
-                                <div>Вт</div>
-                                <div>Ср</div>
-                                <div>Чт</div>
-                                <div>Пт</div>
-                                <div>Сб</div>
-                            </div>
-                            <div class="calendar-days"></div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Sidebar Event Form -->
-                <div class="w-96 bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-fit sticky top-8" id="eventFormContainer">
-                    <div class="mt-4">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white" data-i18n="add_event">Add Event</h3>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="selected_date">Selected Date: <span id="selectedDate" data-i18n="no_date_selected">No date selected</span></p>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="title">Title</label>
-                                <input type="text" id="eventTitle" data-i18n-placeholder="enter_event_title" placeholder="Enter event title" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="time">Time</label>
-                                <input type="time" id="eventTime" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="category">Category</label>
-                                <select id="eventCategory" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
-                                    <option value="reminder" data-i18n="reminder">Reminder</option>
-                                    <option value="test_run" data-i18n="test_run">Test Run</option>
-                                </select>
-                            </div>
-                            <div id="testRunFields" class="space-y-4 hidden">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="repeat_period">Repeat Period</label>
-                                    <select id="repeatPeriod" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
-                                        <option value="daily" data-i18n="daily">Daily</option>
-                                        <option value="weekly" data-i18n="weekly">Weekly</option>
-                                        <option value="monthly" data-i18n="monthly">Monthly</option>
-                                    </select>
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="skip_weekends">Skip Weekends</label>
-                                    <input type="checkbox" id="skipWeekends" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-coral-500">
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="event_color">Event Color</label>
-                                <input type="color" id="eventColor" value="#FF7F50">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
-                                <textarea id="eventDescription" data-i18n-placeholder="enter_event_description" placeholder="Enter event description" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm"></textarea>
-                            </div>
-                            <button type="submit" data-i18n="save_event" class="w-full bg-coral-500 text-white py-2 px-4 rounded-md hover:bg-coral-600">Save Event</button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-y-auto p-4">
+                <div class="flex flex-col md:flex-row mx-auto gap-6 max-w-7xl" style="min-height: calc(100vh - 150px);">
+                    <!-- Calendar Section -->
+                    <div class="md:w-3/5 w-full">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 h-full">
+                            <div class="calendar">
+                                <div class="calendar-header flex items-center justify-between mb-4">
+                                    <button class="calendar-nav-btn flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" onclick="previousMonth()">
+                                        <i class="ri-arrow-left-s-line text-lg"></i>
+                                    </button>
+                                    <h2 class="calendar-current-month text-xl font-semibold text-gray-800 dark:text-gray-200"></h2>
+                                    <button class="calendar-nav-btn flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" onclick="nextMonth()">
+                                        <i class="ri-arrow-right-s-line text-lg"></i>
+                                    </button>
+                                </div>
+                                <div class="calendar-weekdays rounded-lg bg-gray-100 dark:bg-gray-700 mb-2">
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="sunday_short">Вс</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="monday_short">Пн</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="tuesday_short">Вт</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="wednesday_short">Ср</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="thursday_short">Чт</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="friday_short">Пт</div>
+                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-300" data-i18n="saturday_short">Сб</div>
+                                </div>
+                                <div class="calendar-days rounded-lg overflow-hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Form Section -->
+                    <div class="md:w-2/5 w-full">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 h-fit md:sticky md:top-8" id="eventFormContainer">
+                            <h3 class="text-xl font-semibold mb-5 text-gray-900 dark:text-white" data-i18n="add_event">Add Event</h3>
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="date">Date</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                        <i class="ri-calendar-line"></i>
+                                    </span>
+                                    <div class="flex items-center relative">
+                                        <input type="date" id="eventDate" 
+                                            class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                            text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors">
+                                        <div class="absolute right-0 bg-gray-100 dark:bg-gray-600 p-2 rounded-r-lg h-full flex items-center pointer-events-none">
+                                            <span id="selectedDate" class="text-sm font-semibold text-gray-600 dark:text-gray-300 px-2"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs italic mt-1 text-gray-500 dark:text-gray-400" data-i18n="click_calendar">Click on calendar to select a date</p>
+                            </div>
+                            <form id="eventForm" class="space-y-5">
+                                <input type="hidden" id="eventDateHidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="title">Title</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                            <i class="ri-text"></i>
+                                        </span>
+                                        <input type="text" id="eventTitle" data-i18n-placeholder="enter_event_title" placeholder="Enter event title" 
+                                            class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                            text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="time">Time</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                            <i class="ri-time-line"></i>
+                                        </span>
+                                        <input type="time" id="eventTime" 
+                                            class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                            text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="category">Category</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                            <i class="ri-list-check"></i>
+                                        </span>
+                                        <select id="eventCategory" 
+                                            class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                            text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors">
+                                            <option value="reminder" data-i18n="reminder">Reminder</option>
+                                            <option value="test_run" data-i18n="test_run">Test Run</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="testRunFields" class="space-y-4 hidden">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="repeat_period">Repeat Period</label>
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                                <i class="ri-repeat-line"></i>
+                                            </span>
+                                            <select id="repeatPeriod" 
+                                                class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                                text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors">
+                                                <option value="daily" data-i18n="daily">Daily</option>
+                                                <option value="weekly" data-i18n="weekly">Weekly</option>
+                                                <option value="monthly" data-i18n="monthly">Monthly</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <label class="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="skip_weekends">
+                                            <input type="checkbox" id="skipWeekends" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 
+                                                text-coral-500 focus:ring-coral-500 shadow-sm">
+                                            <span>Skip Weekends</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- Hidden field for color, will be set in JS based on category -->
+                                <input type="hidden" id="eventColor" value="#FF7F50">
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="description">Description</label>
+                                    <div class="relative">
+                                        <span class="absolute top-3 left-3 pointer-events-none text-gray-500 dark:text-gray-400">
+                                            <i class="ri-file-text-line"></i>
+                                        </span>
+                                        <textarea id="eventDescription" data-i18n-placeholder="enter_event_description" placeholder="Enter event description" 
+                                            class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                                            text-gray-900 dark:text-gray-100 focus:ring-coral-500 focus:border-coral-500 shadow-sm transition-colors min-h-[80px]"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" 
+                                    class="w-full bg-coral-500 text-white py-3 px-4 rounded-lg hover:bg-coral-600 
+                                    transition-all duration-300 flex items-center justify-center gap-2 font-medium
+                                    hover:shadow-xl hover:scale-105 transform focus:ring-2 focus:ring-coral-300 text-lg">
+                                    <i class="ri-save-line text-xl"></i>
+                                    <span data-i18n="save_event" class="font-bold">Save Event</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
     <!-- Events Modal -->
-    <div id="eventsModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
+    <div id="eventsModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto shadow-xl">
+            <div class="flex justify-between items-center mb-5">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200" id="modalDate"></h3>
                 <button onclick="closeModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                    <i class="fas fa-times"></i>
+                    <i class="ri-close-line text-xl"></i>
                 </button>
             </div>
             <div id="eventsList" class="space-y-4"></div>
         </div>
     </div>
 
+    <!-- Hidden input for storing the selected date -->
+    <input type="hidden" id="eventDate">
+    
     <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/translations.js"></script>
     <script src="js/auth-interceptor.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/menu.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    
     <script>
-        // Ждем загрузки i18n
-        document.addEventListener('DOMContentLoaded', () => {
-            // Инициализируем i18n
-            window.i18n.init().then(() => {
-                // После загрузки переводов загружаем календарь
-                const calendarScript = document.createElement('script');
-                calendarScript.src = 'js/calendar.js';
-                document.body.appendChild(calendarScript);
-            });
-        });
+        // Define global function for closing modal
+        function closeModal() {
+            document.getElementById('eventsModal').classList.add('hidden');
+        }
+        
+        // Define global functions for calendar navigation
+        function previousMonth() {
+            window.Calendar.previousMonth();
+        }
+        
+        function nextMonth() {
+            window.Calendar.nextMonth();
+        }
     </script>
-    <button onclick="toggleTheme()">Переключить тему</button>
 </body>
 </html>

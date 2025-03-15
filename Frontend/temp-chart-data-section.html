@@ -1,0 +1,54 @@
+<!-- Data Configuration Section -->
+<div class="mb-4">
+    <h4 class="text-md font-medium text-gray-800 dark:text-white mb-2" data-i18n="dataConfiguration">Настройка данных</h4>
+    
+    <!-- Data Source Selector -->
+    <div class="mb-3">
+        <label for="chartDataSource" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="dataSource">Источник данных</label>
+        <select id="chartDataSource" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-coral-500 focus:border-coral-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+            <option value="manual" data-i18n="manualEntry">Ручной ввод</option>
+            <option value="test_results" data-i18n="testResults">Результаты тестов</option>
+            <option value="test_statuses" data-i18n="testStatuses">Статусы тестов</option>
+            <option value="test_runs" data-i18n="testRuns">Запуски тестов</option>
+        </select>
+    </div>
+    
+    <!-- Variable Selection (displays when data source is not manual) -->
+    <div id="variableSelectionContainer" class="mb-3 hidden">
+        <label for="dataVariable" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="dataVariable">Переменная</label>
+        <select id="dataVariable" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-coral-500 focus:border-coral-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+            <!-- Будет заполнено динамически в зависимости от выбранного источника данных -->
+        </select>
+    </div>
+    
+    <!-- Time Period for Data (displays when data source is not manual) -->
+    <div id="timePeriodContainer" class="mb-3 hidden">
+        <label for="timePeriod" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="timePeriod">Период</label>
+        <select id="timePeriod" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-coral-500 focus:border-coral-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+            <option value="last_7_days" data-i18n="last7Days">Последние 7 дней</option>
+            <option value="last_30_days" data-i18n="last30Days">Последние 30 дней</option>
+            <option value="last_90_days" data-i18n="last90Days">Последние 90 дней</option>
+            <option value="this_month" data-i18n="thisMonth">Этот месяц</option>
+            <option value="last_month" data-i18n="lastMonth">Прошлый месяц</option>
+            <option value="this_year" data-i18n="thisYear">Этот год</option>
+        </select>
+    </div>
+    
+    <!-- Manual Data Entry (displays only when data source is manual) -->
+    <div id="manualDataContainer">
+        <!-- Labels -->
+        <div class="mb-3">
+            <label for="chartLabels" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-i18n="labels">Метки (через запятую)</label>
+            <input type="text" id="chartLabels" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-coral-500 focus:border-coral-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Январь, Февраль, Март">
+        </div>
+        
+        <!-- Datasets -->
+        <div id="datasetsContainer">
+            <!-- Dataset entries will be generated here -->
+        </div>
+        
+        <button id="addDatasetBtn" class="mt-2 px-3 py-1 bg-coral-500 text-white rounded hover:bg-coral-600">
+            <i class="ri-add-line mr-1"></i> <span data-i18n="addDataset">Добавить набор данных</span>
+        </button>
+    </div>
+</div>

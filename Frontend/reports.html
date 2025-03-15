@@ -3,14 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="reports">Test Reports Dashboard</title>
+    <title data-i18n="reports">Test Reports</title>
+    
+    <!-- Theme preloader script to avoid flashing of wrong theme -->
     <script src="js/theme-preloader.js"></script>
+    
+    <!-- Tailwind and styling -->
+    <script src="js/theme-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            400: '#FF7F50',
+                            500: '#FF6347',
+                            600: '#FF4500',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Core scripts and styles -->
     <script src="js/i18n.js"></script>
     <script src="js/theme-manager.js"></script>
     <script src="js/settings.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/toast.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
     <div class="min-h-screen flex">
@@ -22,290 +47,145 @@
                 </a>
                 <nav class="space-y-2">
                     <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        <span data-i18n="dashboard">Панель управления</span>
+                        <i class="ri-dashboard-line text-xl mr-3"></i>
+                        <span data-i18n="dashboard">Dashboard</span>
                     </a>
-                    <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <span data-i18n="testCases">Тест кейсы</span>
+                    <a href="test-cases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-list-line text-xl mr-3"></i>
+                        <span data-i18n="testCases">Test Cases</span>
                     </a>
-                    <!-- Добавьте остальные пункты меню как в index.html -->
+                    <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-calendar-event-line text-xl mr-3"></i>
+                        <span data-i18n="events">Events</span>
+                    </a>
+                    <a href="reports.html" class="flex items-center p-2 bg-coral-50 dark:bg-gray-700 text-coral-600 dark:text-coral-400 rounded-lg">
+                        <i class="ri-file-chart-line text-xl mr-3"></i>
+                        <span data-i18n="reports">Reports</span>
+                    </a>
                 </nav>
             </div>
         </aside>
 
         <div class="flex-1">
             <!-- Header -->
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
-                    <div class="flex items-center space-x-4">
-                        <a href="javascript:void(0)" onclick="goBack()" class="flex items-center text-gray-600 dark:text-gray-300 hover:text-coral-500 dark:hover:text-coral-400">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            <span data-i18n="back">Назад</span>
-                        </a>
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100" data-i18n="reports">Отчеты</h1>
-                    </div>
-                    <!-- User Menu -->
-                    <div class="flex items-center space-x-4">
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="reports">Reports</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
                         <!-- Project Selector -->
-                        <div class="w-48">
-                            <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
-                                <option value="" selected>Все проекты</option>
-                            </select>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-48">
+                                <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                    <option value="" disabled selected data-i18n="selectProject">Select Project</option>
+                                    <!-- Projects will be loaded dynamically -->
+                                </select>
+                            </div>
                         </div>
-                        <!-- User Profile -->
-                        <button id="userMenuButton" class="flex items-center">
-                            <!-- Add user menu button content -->
-                        </button>
+
+                        <!-- Notifications -->
+                        <div id="notifications-wrapper" class="relative">
+                            <button type="button" onclick="toggleNotifications()"
+                                class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-coral-600 dark:hover:text-coral-400">
+                                <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-coral-600 rounded-full hidden">0</span>
+                                <i class="ri-notification-line text-xl"></i>
+                                <span class="sr-only" data-i18n="notifications">Notifications</span>
+                            </button>
+                            <div id="notificationList" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
+                                </div>
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <!-- Main Content -->
-            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <!-- Filters Section -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="relative">
-                            <select class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 py-2 px-3">
-                                <option>Select Project</option>
-                                <option>Project A</option>
-                                <option>Project B</option>
-                            </select>
+            <main class="p-6">
+                <!-- Report Templates Section -->
+                <div id="templates" class="block">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="reportTemplates">Report Templates</h2>
+                            <div class="flex space-x-3">
+                                <button id="create-template-btn" class="bg-coral-500 hover:bg-coral-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-coral-300">
+                                    <i class="ri-add-line mr-1"></i> <span data-i18n="createTemplate">Create Template</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="relative">
-                            <select class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 py-2 px-3">
-                                <option>Select Tester</option>
-                                <option>John Doe</option>
-                                <option>Jane Smith</option>
-                            </select>
-                        </div>
-                        <div class="relative">
-                            <select class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 py-2 px-3">
-                                <option>Test Status</option>
-                                <option>Passed</option>
-                                <option>Failed</option>
-                                <option>Skipped</option>
-                            </select>
-                        </div>
-                        <div class="relative">
-                            <input type="date" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 py-2 px-3">
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Tabs -->
-                <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-                    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-700 dark:text-gray-300" role="tablist">
-                        <li class="mr-2" role="presentation">
-                            <button class="inline-block p-4 border-b-2 rounded-t-lg border-coral-500 text-coral-500" type="button" onclick="showTab('general')">
-                                <span class="flex items-center">
-                                    <i class="ri-dashboard-line mr-2"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">General Data</span>
-                                </span>
-                            </button>
-                        </li>
-                        <li class="mr-2" role="presentation">
-                            <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-coral-500 dark:hover:text-coral-400" type="button" onclick="showTab('statistics')">
-                                <span class="flex items-center">
-                                    <i class="ri-bar-chart-box-line mr-2"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">Test Case Statistics</span>
-                                </span>
-                            </button>
-                        </li>
-                        <li class="mr-2" role="presentation">
-                            <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-coral-500 dark:hover:text-coral-400" type="button" onclick="showTab('efficiency')">
-                                <span class="flex items-center">
-                                    <i class="ri-user-star-line mr-2"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">User Efficiency</span>
-                                </span>
-                            </button>
-                        </li>
-                        <li class="mr-2" role="presentation">
-                            <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-coral-500 dark:hover:text-coral-400" type="button" onclick="showTab('regression')">
-                                <span class="flex items-center">
-                                    <i class="ri-history-line mr-2"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">Regression History</span>
-                                </span>
-                            </button>
-                        </li>
-                        <li role="presentation">
-                            <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-coral-500 dark:hover:text-coral-400" type="button" onclick="showTab('runs')">
-                                <span class="flex items-center">
-                                    <i class="ri-run-line mr-2"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">Test Runs</span>
-                                </span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Content Area -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <!-- General Data Tab Content -->
-                    <div id="general" class="tab-content">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div class="bg-gradient-to-br from-coral-400 to-coral-500 rounded-lg p-6 text-white">
-                                <h3 class="text-lg font-semibold mb-2">Total Test Cases</h3>
-                                <p class="text-3xl font-bold">1,234</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white">
-                                <h3 class="text-lg font-semibold mb-2">Automated Tests</h3>
-                                <p class="text-3xl font-bold">789</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-                                <h3 class="text-lg font-semibold mb-2">Success Rate</h3>
-                                <p class="text-3xl font-bold">92%</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-6 text-white">
-                                <h3 class="text-lg font-semibold mb-2">Failed Tests</h3>
-                                <p class="text-3xl font-bold">45</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Test Case Statistics Tab Content -->
-                    <div id="statistics" class="tab-content hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Test Types Distribution</h3>
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 dark:text-gray-300">Unit Tests</span>
-                                        <span class="text-coral-600 font-semibold">45%</span>
+                        <!-- Templates Grid -->
+                        <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Template cards will be dynamically loaded here -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                    <h3 class="font-medium text-gray-900 dark:text-white">Test Results Summary</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="Edit Template">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <button class="text-gray-500 hover:text-red-500" title="Delete Template">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
                                     </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div class="bg-coral-600 h-2.5 rounded-full" style="width: 45%"></div>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex justify-center items-center mb-4 h-40 bg-gray-100 dark:bg-gray-700 rounded">
+                                        <div class="text-gray-400 dark:text-gray-500 text-center">
+                                            <i class="ri-pie-chart-line text-5xl"></i>
+                                        </div>
                                     </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 dark:text-gray-300">Integration Tests</span>
-                                        <span class="text-green-600 font-semibold">30%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div class="bg-green-600 h-2.5 rounded-full" style="width: 30%"></div>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 dark:text-gray-300">E2E Tests</span>
-                                        <span class="text-blue-600 font-semibold">25%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 25%"></div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Displays test execution results with pass/fail/skip statistics.
+                                    </p>
+                                    <div class="flex justify-end">
+                                        <button class="px-4 py-2 bg-coral-100 text-coral-600 rounded-lg hover:bg-coral-200" data-i18n="useTemplate">
+                                            Use Template
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Test Results</h3>
-                                <div class="space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                                            <span class="text-gray-700 dark:text-gray-300">Passed</span>
-                                        </div>
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">856</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                                            <span class="text-gray-700 dark:text-gray-300">Failed</span>
-                                        </div>
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">45</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-                                            <span class="text-gray-700 dark:text-gray-300">Skipped</span>
-                                        </div>
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">23</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Test Duration</h3>
-                                <div class="space-y-4">
-                                    <div class="text-center">
-                                        <div class="text-4xl font-bold text-coral-600">2h 45m</div>
-                                        <div class="text-gray-500 dark:text-gray-400">Average Duration</div>
-                                    </div>
-                                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-700 dark:text-gray-300">Fastest Test:</span>
-                                            <span class="font-semibold text-gray-700 dark:text-gray-300">15s</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm mt-2">
-                                            <span class="text-gray-700 dark:text-gray-300">Slowest Test:</span>
-                                            <span class="font-semibold text-gray-700 dark:text-gray-300">4m 30s</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- User Efficiency Tab Content -->
-                    <div id="efficiency" class="tab-content hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Top Performers</h3>
-                                <div class="space-y-4">
-                                    <!-- Карточки пользователей... -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                    <h3 class="font-medium text-gray-900 dark:text-white">Test Execution Trend</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="Edit Template">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <button class="text-gray-500 hover:text-red-500" title="Delete Template">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Метрики эффективности... -->
-                        </div>
-                    </div>
-
-                    <!-- Regression History Tab Content -->
-                    <div id="regression" class="tab-content hidden">
-                        <div class="space-y-6">
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Regression Timeline</h3>
-                                <div class="space-y-4">
-                                    <!-- Timeline элементы... -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Test Runs Tab Content -->
-                    <div id="runs" class="tab-content hidden">
-                        <div class="space-y-6">
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Recent Test Runs</h3>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead>
-                                            <tr>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Run ID</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Duration</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">#12345</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">2023-10-15</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Completed</span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">1h 30m</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">#12344</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">2023-10-14</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">Failed</span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">45m</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="p-4">
+                                    <div class="flex justify-center items-center mb-4 h-40 bg-gray-100 dark:bg-gray-700 rounded">
+                                        <div class="text-gray-400 dark:text-gray-500 text-center">
+                                            <i class="ri-line-chart-line text-5xl"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Shows test execution trends over time with success rate.
+                                    </p>
+                                    <div class="flex justify-end">
+                                        <button class="px-4 py-2 bg-coral-100 text-coral-600 rounded-lg hover:bg-coral-200" data-i18n="useTemplate">
+                                            Use Template
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -315,40 +195,133 @@
         </div>
     </div>
 
+    <!-- Template Editor Modal -->
+    <div id="template-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <button id="close-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6" data-i18n="createTemplate">Create Template</h3>
+                
+                <div class="space-y-6">
+                    <!-- Template Basic Info -->
+                    <div>
+                        <label for="template-name" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="templateName">Template Name</label>
+                        <input type="text" id="template-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Enter template name" data-i18n-placeholder="enterTemplateName">
+                    </div>
+
+                    <div>
+                        <label for="template-description" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="description">Description</label>
+                        <textarea id="template-description" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Enter template description" data-i18n-placeholder="enterTemplateDescription"></textarea>
+                    </div>
+
+                    <!-- Report Components -->
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3" data-i18n="reportComponents">Report Components</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input id="include-summary" type="checkbox" class="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500 dark:focus:ring-coral-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <label for="include-summary" class="ml-2 text-sm font-medium text-gray-900 dark:text-white" data-i18n="summaryMetrics">Summary Metrics</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="include-status-chart" type="checkbox" class="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500 dark:focus:ring-coral-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <label for="include-status-chart" class="ml-2 text-sm font-medium text-gray-900 dark:text-white" data-i18n="statusChart">Status Distribution Chart</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="include-trend-chart" type="checkbox" class="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500 dark:focus:ring-coral-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <label for="include-trend-chart" class="ml-2 text-sm font-medium text-gray-900 dark:text-white" data-i18n="trendChart">Execution Trend Chart</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="include-test-table" type="checkbox" class="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500 dark:focus:ring-coral-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <label for="include-test-table" class="ml-2 text-sm font-medium text-gray-900 dark:text-white" data-i18n="testTable">Test Results Table</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Range Settings -->
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3" data-i18n="defaultTimeRange">Default Time Range</h4>
+                        <select id="default-time-range" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                            <option value="7d" data-i18n="last7days">Last 7 Days</option>
+                            <option value="30d" selected data-i18n="last30days">Last 30 Days</option>
+                            <option value="90d" data-i18n="last90days">Last 90 Days</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button id="cancel-template" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300" data-i18n="cancel">Cancel</button>
+                        <button id="save-template" class="px-4 py-2 bg-coral-500 text-white rounded-lg hover:bg-coral-600 focus:outline-none focus:ring-4 focus:ring-coral-300" data-i18n="saveTemplate">Save Template</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Details Modal -->
+    <div id="test-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <button id="close-test-details" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6" id="test-details-title">Test Details</h3>
+                
+                <div class="space-y-6">
+                    <!-- Test Info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="status">Status</p>
+                            <p id="test-details-status" class="font-medium text-gray-900 dark:text-white">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="duration">Duration</p>
+                            <p id="test-details-duration" class="font-medium text-gray-900 dark:text-white">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="type">Type</p>
+                            <p id="test-details-type" class="font-medium text-gray-900 dark:text-white">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="date">Date</p>
+                            <p id="test-details-date" class="font-medium text-gray-900 dark:text-white">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Test Output -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 mb-2" data-i18n="testOutput">Test Output</h4>
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 max-h-96 overflow-y-auto">
+                            <pre id="test-details-output" class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">-</pre>
+                        </div>
+                    </div>
+
+                    <!-- History Chart -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 mb-2" data-i18n="testHistory">Test History</h4>
+                        <div class="h-64">
+                            <canvas id="test-history-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50"></div>
+
     <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/common.js"></script>
     <script src="js/auth-interceptor.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/user.js"></script>
     <script src="js/init.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
-    <script>
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = '/index.html';
-        }
-    }
-    </script>
-    <script>
-    function showTab(tabId) {
-        // Скрываем все табы
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.add('hidden');
-        });
-        
-        // Показываем выбранный таб
-        document.getElementById(tabId).classList.remove('hidden');
-        
-        // Убираем активное состояние у всех кнопок
-        document.querySelectorAll('[role="presentation"] button').forEach(button => {
-            button.classList.remove('border-coral-500', 'text-coral-500');
-            button.classList.add('border-transparent');
-        });
-        
-        // Добавляем активное состояние выбранной кнопке
-        event.currentTarget.classList.remove('border-transparent');
-        event.currentTarget.classList.add('border-coral-500', 'text-coral-500');
-    }
-    </script>
+    <script src="js/reports.js"></script>
 </body>
 </html>

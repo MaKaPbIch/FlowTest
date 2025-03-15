@@ -10,7 +10,6 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    margin-bottom: 1rem;
     border-bottom: 1px solid #eee;
 }
 
@@ -19,21 +18,26 @@
 }
 
 .calendar-nav-btn {
-    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #f8f9fa;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 9999px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .dark .calendar-nav-btn {
     background: #374151;
     color: #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-nav-btn:hover {
     background: #e9ecef;
+    transform: translateY(-1px);
 }
 
 .dark .calendar-nav-btn:hover {
@@ -51,18 +55,17 @@
 
 .calendar-weekdays {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.25rem;
+    grid-template-columns: repeat(7, minmax(38px, 1fr));
+    gap: 0.35rem;
     padding: 0.5rem;
     background: #f8f9fa;
     border-radius: 0.5rem;
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
+    width: 100%;
 }
 
 .dark .calendar-weekdays {
     background: #374151;
-    border-bottom-color: #4b5563;
 }
 
 .calendar-weekdays div {
@@ -78,74 +81,122 @@
 
 .calendar-days {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.25rem;
+    grid-template-columns: repeat(7, minmax(38px, 1fr));
+    gap: 0.35rem;
     flex-grow: 1;
-    padding: 10px;
+    padding: 0.5rem;
+    width: 100%;
 }
 
 #calendarDays {
     display: grid;
     grid-template-columns: repeat(7, minmax(40px, 1fr));
-    gap: 4px;
+    gap: 6px;
     padding: 8px;
 }
 
 .calendar-day {
-    width: 40px;
-    height: 40px;
+    aspect-ratio: 1/1;
+    min-width: 38px;
+    min-height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.2s;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     position: relative;
     color: #1f2937;
+    font-weight: 500;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
 }
 
 .dark .calendar-day {
     color: #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    background-color: #1f2937;
 }
 
 .calendar-day:hover {
-    background-color: #f8f9fa;
+    background-color: #f0f4f8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .dark .calendar-day:hover {
     background-color: #374151;
     color: #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-day.other-month {
     color: #adb5bd;
+    opacity: 0.6;
 }
 
 .dark .calendar-day.other-month {
     color: #6b7280;
+    opacity: 0.6;
 }
 
 .calendar-day.today {
-    background-color: #ff6b6b;
+    background-color: #ff7f50;
     color: white !important;
+    box-shadow: 0 4px 6px rgba(255, 127, 80, 0.3);
+}
+
+.dark .calendar-day.today {
+    box-shadow: 0 4px 6px rgba(255, 127, 80, 0.5);
 }
 
 .calendar-day.selected {
     background-color: #4dabf7;
     color: white !important;
+    box-shadow: 0 4px 6px rgba(77, 171, 247, 0.3);
+}
+
+.dark .calendar-day.selected {
+    box-shadow: 0 4px 6px rgba(77, 171, 247, 0.5);
 }
 
 .event-dot {
     position: absolute;
-    bottom: 2px;
+    bottom: 4px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background-color: #ff6b6b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dark .event-dot {
     background-color: #ff7f50;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+#eventsModal {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#eventsList > div {
+    transition: all 0.2s ease;
+    border-radius: 12px;
+}
+
+#eventsList > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark #eventsList > div:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }

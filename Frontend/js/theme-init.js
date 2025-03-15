@@ -1,31 +1,16 @@
-// Немедленно применяем тему из localStorage при загрузке
-(function() {
-    const theme = localStorage.getItem('theme');
-    if (theme) {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-    }
-})();
+/**
+ * FlowTest Theme Initialization
+ * This script ensures the correct theme is applied immediately when page loads
+ */
 
-// После загрузки DOM проверяем тему на сервере
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/get_current_user/');
-        if (!response.ok) throw new Error('Failed to fetch theme');
-        
-        const data = await response.json();
-        const serverTheme = data.theme;
-        
-        if (serverTheme) {
-            localStorage.setItem('theme', serverTheme);
-            document.documentElement.classList.toggle('dark', serverTheme === 'dark');
-            
-            // Обновляем состояние переключателя если он есть
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.checked = serverTheme === 'dark';
-            }
-        }
-    } catch (error) {
-        console.error('Error fetching theme from server:', error);
-    }
-}); 
+// Get stored theme or use system preference as fallback
+const storedTheme = localStorage.getItem('theme');
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const currentTheme = storedTheme || systemTheme;
+
+// Apply theme immediately to prevent flash of wrong theme
+if (currentTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+} else {
+    document.documentElement.classList.remove('dark');
+}

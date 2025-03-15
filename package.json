@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build:css": "tailwindcss -i ./Frontend/css/input.css -o ./Frontend/css/tailwind.min.css --minify",
+    "watch:css": "tailwindcss -i ./Frontend/css/input.css -o ./Frontend/css/tailwind.min.css --watch"
+  },
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "axios": "^1.7.7",

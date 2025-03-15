@@ -34,57 +34,97 @@
                     <!-- Заголовок и кнопки -->
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center space-x-4 flex-grow">
-                            <input type="text" class="text-2xl font-bold text-gray-800 dark:text-gray-100 border-b-2 border-transparent focus:border-coral-500 focus:outline-none bg-transparent" value="Select a test case" readonly>
+                            <input id="testCaseTitle" type="text" class="text-2xl font-bold text-gray-800 dark:text-gray-100 border-b-2 border-transparent focus:border-coral-500 focus:outline-none bg-transparent" value="Select a test case" readonly disabled>
                         </div>
                         <div class="flex space-x-3">
-                            <button id="editBtn" class="px-4 py-2 bg-coral-100 dark:bg-coral-900/30 text-coral-600 dark:text-coral-400 rounded-lg hover:bg-coral-200 dark:hover:bg-coral-900/50" onclick="testCases.toggleEdit()" disabled>
+                            <button id="editButton" onclick="testCaseManager.enableEditMode()" class="px-4 py-2 bg-coral-100 dark:bg-coral-900/30 text-coral-600 dark:text-coral-400 rounded-lg hover:bg-coral-200 dark:hover:bg-coral-900/50">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                                 Edit
                             </button>
+                            <button id="saveButton" onclick="testCaseManager.saveChanges()" class="hidden px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50">
+                                Save
+                            </button>
+                            <button id="cancelButton" onclick="testCaseManager.cancelEdit()" class="hidden px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Основная информация -->
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Platform</label>
+                            <select id="platform" class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" disabled>
+                                <option value="">Select Platform</option>
+                                <option value="web">Web</option>
+                                <option value="mobile">Mobile</option>
+                                <option value="desktop">Desktop</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                            <select id="priority" class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" disabled>
+                                <option value="">Select Priority</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Type</label>
+                            <select id="testType" class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" disabled>
+                                <option value="">Select Type</option>
+                                <option value="functional">Functional</option>
+                                <option value="integration">Integration</option>
+                                <option value="e2e">End-to-End</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimated Time (minutes)</label>
+                            <input id="estimatedTime" type="number" class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" value="30" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Теги -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
+                            <div class="flex items-center space-x-2 edit-action-button hidden">
+                                <input id="addTagInput" type="text" class="p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" placeholder="Add tag..." disabled>
+                                <button onclick="testCaseManager.addTag()" class="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50">
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                        <div id="tagsContainer" class="flex flex-wrap gap-2">
+                            <!-- Теги будут добавлены динамически -->
                         </div>
                     </div>
 
                     <!-- Описание -->
-                    <div class="mb-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="font-semibold text-gray-700 dark:text-gray-300">Description</h3>
-                            <button class="text-coral-600 dark:text-coral-400 hover:text-coral-800 dark:hover:text-coral-300 text-sm font-medium" onclick="testCases.toggleDescription()">
-                                Show More
-                            </button>
-                        </div>
-                        <textarea id="description" class="w-full p-3 bg-white dark:bg-gray-700 rounded-lg shadow-inner border-0 focus:ring-2 focus:ring-coral-200 dark:focus:ring-coral-900 text-gray-900 dark:text-gray-100" rows="2" readonly>Select a test case to view description</textarea>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="description" class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" rows="4" disabled></textarea>
+                    </div>
+
+                    <!-- Код теста -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Code</label>
+                        <textarea id="testCode" class="w-full p-2 font-mono border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800 dark:text-gray-100" rows="10" disabled></textarea>
                     </div>
 
                     <!-- Шаги -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-semibold text-gray-700 dark:text-gray-300">Steps and Expected Results</h3>
-                            <button id="addStepBtn" onclick="testCases.addStep()" class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50" disabled>
+                            <button onclick="testCaseManager.addStep()" class="edit-action-button hidden px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50">
                                 Add Step
                             </button>
                         </div>
-                        <div class="space-y-4" id="steps-container">
+                        <div id="stepsContainer" class="space-y-4">
                             <!-- Шаги будут добавлены динамически -->
-                        </div>
-                    </div>
-
-                    <!-- Нижняя панель -->
-                    <div class="border-t dark:border-gray-700 pt-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <span class="px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-900/50 text-green-600 dark:text-green-400">Last Run: -</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">-</span>
-                            </div>
-                            <div class="space-x-3">
-                                <button id="saveBtn" onclick="testCases.saveChanges()" class="hidden px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transform transition hover:scale-105 shadow-md">
-                                    Save Changes
-                                </button>
-                                <button id="runTestBtn" onclick="testCases.runTest()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transform transition hover:scale-105 shadow-md" disabled>
-                                    Run Test
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,23 +134,9 @@
 
     <!-- Scripts -->
     <script src="js/auth-interceptor.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/test-execution-manager.js"></script>
-    <script src="js/test-case.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/testcases.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            testCases.load();
-        });
-    </script>
-    <script>
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'updateTestCase') {
-                const testcase = event.data.data;
-                testCases.updateTestCaseInfo(testcase);
-            }
-        });
-    </script>
 </body>
 </html>

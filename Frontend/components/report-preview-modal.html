@@ -1,0 +1,61 @@
+<!-- Report Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white" data-i18n="reportPreview">Report Preview</h3>
+                <button id="close-preview" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <div id="preview-content" class="space-y-6">
+                <!-- Preview content will be loaded here -->
+            </div>
+            
+            <div class="flex justify-end mt-6 space-x-3">
+                <button id="export-pdf" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:focus:ring-gray-700">
+                    <i class="ri-file-pdf-line mr-1"></i> <span data-i18n="exportPDF">Export PDF</span>
+                </button>
+                <button id="close-preview-btn" class="bg-coral-500 hover:bg-coral-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-coral-300">
+                    <i class="ri-close-line mr-1"></i> <span data-i18n="close">Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional styles for preview modal */
+#preview-content .chart-container {
+    margin: 20px 0;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dark #preview-content .chart-container {
+    background-color: #1e293b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#preview-content canvas {
+    display: block !important;
+    max-width: 100%;
+    min-height: 300px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+}
+
+.dark #preview-content canvas {
+    background-color: rgba(30, 41, 59, 0.8);
+}
+
+#preview-content .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+</style>

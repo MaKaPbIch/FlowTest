@@ -19,8 +19,12 @@ class TestExecutionManager {
     async startTest(testCaseId) {
         try {
             // Запускаем тест через API
-            const response = await fetch(`/api/test-cases/${testCaseId}/run_test/`, {
-                method: 'POST'
+            const response = await fetch(`${API_BASE_URL}/projects/${localStorage.getItem('selectedProject')}/test_cases/${testCaseId}/run_test/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`,
+                    'Content-Type': 'application/json'
+                }
             });
             const data = await response.json();
             

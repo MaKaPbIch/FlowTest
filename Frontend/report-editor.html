@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="reportEditor">Report Editor</title>
+    
+    <!-- Theme preloader script to avoid flashing of wrong theme -->
+    <script src="js/theme-preloader.js"></script>
+    
+    <!-- Tailwind and styling -->
+    <script src="js/theme-init.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            400: '#FF7F50',
+                            500: '#FF6347',
+                            600: '#FF4500',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Add debugging CSS to make drop zone more visible -->
+    <style id="debug-styles">
+        .drop-zone {
+            border: 3px dashed #FF6347 !important;
+            min-height: 400px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .drop-zone.highlight {
+            background-color: rgba(255, 99, 71, 0.2) !important;
+            border-color: #FF0000 !important;
+        }
+        
+        .report-element {
+            cursor: grab !important;
+            user-select: none !important;
+            -webkit-user-drag: element !important;
+            padding: 10px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .report-element:hover {
+            transform: scale(1.02) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        }
+        
+        .report-element:active {
+            cursor: grabbing !important;
+        }
+    </style>
+    
+    <!-- Core scripts and styles -->
+    <script src="js/config.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth-interceptor.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/toast.js"></script>
+    <style>
+        .report-element {
+            cursor: grab;
+        }
+        
+        .report-element:active {
+            cursor: grabbing;
+        }
+        
+        .drop-zone {
+            min-height: 200px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.highlight {
+            border-color: #FF6347;
+            background-color: rgba(255, 99, 71, 0.05);
+        }
+        
+        .chart-container {
+            position: relative;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            border-color: #FF6347;
+        }
+        
+        .chart-resizer {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            cursor: se-resize;
+            color: #94a3b8;
+            z-index: 10;
+        }
+        
+        .chart-container:hover .chart-resizer {
+            color: #FF6347;
+        }
+        
+        .chart-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        
+        .chart-control-btn {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            padding: 2px 5px;
+            font-size: 0.75rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .chart-control-btn:hover {
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+        
+        .dark .chart-control-btn {
+            background-color: #1e293b;
+            border-color: #475569;
+            color: #cbd5e1;
+        }
+        
+        .dark .chart-control-btn:hover {
+            background-color: #334155;
+            color: #f1f5f9;
+        }
+        
+        .report-element {
+            cursor: move;
+        }
+        
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.highlight {
+            border-color: #FF6347;
+            background-color: rgba(255, 99, 71, 0.05);
+        }
+        
+        .dark .drop-zone {
+            border-color: #334155;
+        }
+        
+        .dark .drop-zone.highlight {
+            border-color: #FF6347;
+            background-color: rgba(255, 99, 71, 0.1);
+        }
+        
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #FF6347;
+            border-radius: 50%;
+        }
+        
+        .resize-handle.e {
+            top: 50%;
+            right: -5px;
+            transform: translateY(-50%);
+            cursor: e-resize;
+        }
+        
+        .resize-handle.s {
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: s-resize;
+        }
+        
+        .resize-handle.se {
+            bottom: -5px;
+            right: -5px;
+            cursor: se-resize;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block h-screen sticky top-0">
+            <div class="p-4">
+                <a href="index.html">
+                    <img src="images/FlowTest.png" alt="FlowTest Logo" class="h-12 w-auto mb-8">
+                </a>
+                <nav class="space-y-2">
+                    <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-dashboard-line text-xl mr-3"></i>
+                        <span data-i18n="dashboard">Dashboard</span>
+                    </a>
+                    <a href="test-cases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-list-line text-xl mr-3"></i>
+                        <span data-i18n="testCases">Test Cases</span>
+                    </a>
+                    <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-calendar-event-line text-xl mr-3"></i>
+                        <span data-i18n="events">Events</span>
+                    </a>
+                    <a href="reports.html" class="flex items-center p-2 bg-coral-50 dark:bg-gray-700 text-coral-600 dark:text-coral-400 rounded-lg">
+                        <i class="ri-file-chart-line text-xl mr-3"></i>
+                        <span data-i18n="reports">Reports</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <div class="flex-1">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4">
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200" data-i18n="reportEditor">Report Editor</h1>
+                    <div class="flex items-center space-x-4 ml-auto">
+                        <!-- Project Selector -->
+                        <div class="flex items-center space-x-2">
+                            <div class="w-48">
+                                <select id="projectSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                    <option value="" disabled selected data-i18n="selectProject">Select Project</option>
+                                    <!-- Projects will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2" aria-expanded="false">
+                                <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-600">?</span>
+                                </div>
+                                <span id="userName" class="text-sm text-gray-700 dark:text-gray-200"></span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
+                                    <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="p-6">
+                <div class="flex mb-6 justify-between">
+                    <div>
+                        <input type="text" id="report-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500" placeholder="Report Name" data-i18n-placeholder="reportName">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="preview-report" class="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                            <i class="ri-eye-line mr-1"></i> <span data-i18n="preview">Preview</span>
+                        </button>
+                        <button id="save-report" class="bg-coral-500 hover:bg-coral-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-coral-300">
+                            <i class="ri-save-line mr-1"></i> <span data-i18n="save">Save</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                    <!-- Left Side - Elements Panel -->
+                    <div class="xl:col-span-1 bg-white dark:bg-gray-800 rounded-lg shadow p-4 max-h-[800px] overflow-y-auto">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Report Elements</h2>
+
+                        <!-- Metrics Data Source Selector -->
+                        <div class="mb-4">
+                            <h3 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Metrics Data Source</h3>
+                            <div class="flex flex-col space-y-2">
+                                <select id="metrics-data-source" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                    <option value="general" selected>General Project Data</option>
+                                    <option value="specific">Specific Test Run</option>
+                                </select>
+                                <div id="test-run-selection" class="hidden mt-2">
+                                    <select id="test-run-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                        <option value="">Select Test Run</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Time Period Selector (visible for General Project Data) -->
+                                <div id="time-period-selection" class="mt-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period</label>
+                                    <select id="time-period-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                        <option value="day">Last 24 Hours</option>
+                                        <option value="week" selected>Last 7 Days</option>
+                                        <option value="month">Last 30 Days</option>
+                                        <option value="year">Last 365 Days</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Custom Date Range (hidden by default) -->
+                                <div id="custom-date-range" class="hidden mt-2">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                                            <input type="date" id="start-date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                                            <input type="date" id="end-date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coral-500 dark:focus:border-coral-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Elements to drag -->
+                        <div class="space-y-4">
+                            <!-- Metrics Section -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Metrics</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="totalTests">
+                                        <div class="w-full text-center bg-blue-50 dark:bg-blue-900 p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 border border-blue-200 dark:border-blue-700">
+                                            <i class="ri-checkbox-multiple-line text-xl text-blue-500 mb-1"></i>
+                                            <div class="text-xs text-blue-700 dark:text-blue-300">Total Tests</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="successRate">
+                                        <div class="w-full text-center bg-green-50 dark:bg-green-900 p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 border border-green-200 dark:border-green-700">
+                                            <i class="ri-percent-line text-xl text-green-500 mb-1"></i>
+                                            <div class="text-xs text-green-700 dark:text-green-300">Success Rate</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="failedTests">
+                                        <div class="w-full text-center bg-red-50 dark:bg-red-900 p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-800 border border-red-200 dark:border-red-700">
+                                            <i class="ri-close-circle-line text-xl text-red-500 mb-1"></i>
+                                            <div class="text-xs text-red-700 dark:text-red-300">Failed Tests</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="averageTime">
+                                        <div class="w-full text-center bg-amber-50 dark:bg-amber-900 p-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800 border border-amber-200 dark:border-amber-700">
+                                            <i class="ri-time-line text-xl text-amber-500 mb-1"></i>
+                                            <div class="text-xs text-amber-700 dark:text-amber-300">Average Time</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="testStability">
+                                        <div class="w-full text-center bg-indigo-50 dark:bg-indigo-900 p-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800 border border-indigo-200 dark:border-indigo-700">
+                                            <i class="ri-rhythm-line text-xl text-indigo-500 mb-1"></i>
+                                            <div class="text-xs text-indigo-700 dark:text-indigo-300">Test Stability</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="blockedTests">
+                                        <div class="w-full text-center bg-orange-50 dark:bg-orange-900 p-2 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-800 border border-orange-200 dark:border-orange-700">
+                                            <i class="ri-lock-line text-xl text-orange-500 mb-1"></i>
+                                            <div class="text-xs text-orange-700 dark:text-orange-300">Blocked Tests</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="automationRate">
+                                        <div class="w-full text-center bg-cyan-50 dark:bg-cyan-900 p-2 rounded-lg hover:bg-cyan-100 dark:hover:bg-cyan-800 border border-cyan-200 dark:border-cyan-700">
+                                            <i class="ri-robot-line text-xl text-cyan-500 mb-1"></i>
+                                            <div class="text-xs text-cyan-700 dark:text-cyan-300">Automation Rate</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="metric" data-metric-id="flakiness">
+                                        <div class="w-full text-center bg-pink-50 dark:bg-pink-900 p-2 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-800 border border-pink-200 dark:border-pink-700">
+                                            <i class="ri-error-warning-line text-xl text-pink-500 mb-1"></i>
+                                            <div class="text-xs text-pink-700 dark:text-pink-300">Flakiness</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Charts Section -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Charts</h3>
+                                <div class="space-y-2">
+                                    <!-- Legacy Chart Types -->
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="executionTrend">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-line-chart-line text-lg mr-2 text-blue-500"></i>
+                                                <span class="text-sm">Execution Trend</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="statusDistribution">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-pie-chart-line text-lg mr-2 text-green-500"></i>
+                                                <span class="text-sm">Status Distribution</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="testExecutionTime">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-bar-chart-horizontal-line text-lg mr-2 text-purple-500"></i>
+                                                <span class="text-sm">Execution Time</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- New Generic Chart Types -->
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="line">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-line-chart-line text-lg mr-2 text-blue-500"></i>
+                                                <span class="text-sm">Line Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="bar">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-bar-chart-2-line text-lg mr-2 text-green-500"></i>
+                                                <span class="text-sm">Bar Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="pie">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-pie-chart-line text-lg mr-2 text-orange-500"></i>
+                                                <span class="text-sm">Pie Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="doughnut">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-donut-chart-line text-lg mr-2 text-red-500"></i>
+                                                <span class="text-sm">Doughnut Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="chart" data-chart-id="radar">
+                                        <div class="w-full text-left bg-white dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <i class="ri-radar-line text-lg mr-2 text-purple-500"></i>
+                                                <span class="text-sm">Radar Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Content Elements -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Content</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="report-element" draggable="true" data-element-type="text">
+                                        <div class="w-full text-center bg-gray-50 dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600">
+                                            <i class="ri-text text-xl text-gray-500 mb-1"></i>
+                                            <div class="text-xs text-gray-700 dark:text-gray-300">Text Block</div>
+                                        </div>
+                                    </div>
+                                    <div class="report-element" draggable="true" data-element-type="table" data-table-id="testResults">
+                                        <div class="w-full text-center bg-indigo-50 dark:bg-indigo-900 p-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800 border border-indigo-200 dark:border-indigo-700">
+                                            <i class="ri-table-line text-xl text-indigo-500 mb-1"></i>
+                                            <div class="text-xs text-indigo-700 dark:text-indigo-300">Results Table</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Report Canvas -->
+                    <div class="xl:col-span-3" style="min-height: 800px;">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="reportLayout">Report Layout</h2>
+                            
+                            <!-- Report Canvas -->
+                            <div id="report-canvas" class="mt-4">
+                                <!-- Main Drop Zone - Simple Area for Report Elements -->
+                                <div id="main-drop-zone" class="drop-zone min-h-[800px] bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-4">
+                                    <!-- Empty state message -->
+                                    <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                                        <i class="ri-layout-line text-5xl mb-3"></i>
+                                        <h3 class="text-xl font-medium mb-2">Report Layout Area</h3>
+                                        <p class="mb-1">Drag and drop elements here to build your report</p>
+                                        <p class="text-sm text-gray-500">Charts, metrics, tables, and text blocks</p>
+                                    </div>
+                                    
+                                    <!-- Контейнер для метрик -->
+                                    <div id="metrics-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Chart Settings Modal -->
+    <div id="chart-settings-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <button id="close-chart-settings" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6" data-i18n="chartSettings">Chart Settings</h3>
+                
+                <div class="space-y-6">
+                    <!-- Chart settings form -->
+                    <div class="mb-4">
+                        <label for="chart-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chart Title</label>
+                        <input type="text" id="chart-title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chart Type</label>
+                        <select id="chart-type-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                            <option value="line">Line Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="radar">Radar Chart</option>
+                        </select>
+                    </div>
+
+                    <div id="axes-selector" class="mb-4">
+                        <h4 class="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Chart Axes</h4>
+                        
+                        <div class="x-axis-selector mb-3">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">X Axis</label>
+                            <select id="x-axis-metric" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                                <option value="timeStamp">Time</option>
+                                <option value="testName">Test Name</option>
+                                <option value="component">Component</option>
+                                <option value="priority">Priority</option>
+                            </select>
+                        </div>
+                        
+                        <div class="y-axis-selector">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Y Axis</label>
+                            <select id="y-axis-metric" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                                <option value="totalTests">Total Tests</option>
+                                <option value="successRate">Success Rate</option>
+                                <option value="failedTests">Failed Tests</option>
+                                <option value="averageTime">Average Time</option>
+                                <option value="testStability">Test Stability</option>
+                                <option value="blockedTests">Blocked Tests</option>
+                                <option value="automationRate">Automation Rate</option>
+                                <option value="flakiness">Flakiness</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label for="chart-width" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Width (px)</label>
+                            <input type="number" id="chart-width" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="800">
+                        </div>
+                        <div>
+                            <label for="chart-height" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Height (px)</label>
+                            <input type="number" id="chart-height" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-coral-500 focus:border-coral-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="400">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input id="show-legend" type="checkbox" class="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500" checked>
+                        <label for="show-legend" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Show Legend</label>
+                    </div>
+                    
+                    <div id="chart-type-options" class="hidden">
+                        <!-- Chart type specific options will be dynamically loaded here -->
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button id="cancel-chart-settings" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:focus:ring-gray-700">
+                        <i class="ri-close-line mr-1"></i> <span data-i18n="cancel">Cancel</span>
+                    </button>
+                    <button id="apply-chart-settings" class="bg-coral-500 hover:bg-coral-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-coral-300">
+                        <i class="ri-check-line mr-1"></i> <span data-i18n="apply">Apply</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Text Editor Modal -->
+    <div id="text-editor-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <button id="close-text-editor" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6" data-i18n="textEditor">Text Editor</h3>
+                
+                <div class="space-y-4">
+                    <textarea id="text-editor-content" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" rows="8" placeholder="Enter your text here..."></textarea>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-text-editor" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:focus:ring-gray-700">
+                            <i class="ri-close-line mr-1"></i> <span data-i18n="cancel">Cancel</span>
+                        </button>
+                        <button id="apply-text-editor" class="bg-coral-500 hover:bg-coral-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-4 focus:ring-coral-300">
+                            <i class="ri-check-line mr-1"></i> <span data-i18n="apply">Apply</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include the Report Preview Modal component -->
+    <div id="preview-modal-container"></div>
+    
+    <script>
+        // Load the preview modal component
+        fetch('components/report-preview-modal.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('preview-modal-container').innerHTML = html;
+                console.log('Preview modal component loaded successfully');
+                
+                // Note: Event listeners for the modal buttons are now set up in
+                // initializePreviewModalButtons() function in report-editor.js
+            })
+            .catch(error => {
+                console.error('Error loading preview modal component:', error);
+            });
+    </script>
+
+    <!-- Load report editor module scripts -->
+    <script src="js/report-modules/report-editor-core.js"></script>
+    <script src="js/report-modules/report-editor-metrics.js"></script>
+    <script src="js/report-modules/report-editor-charts.js"></script>
+    <script src="js/report-modules/report-editor-elements.js"></script>
+    <script src="js/report-modules/report-editor-templates.js"></script>
+    <!-- Load chart fixes directly instead of using eval() -->
+    <script src="js/fixed-chart-changes.js"></script>
+    <script src="js/fixed-chart-editor.js"></script>
+    <script>
+        // Initialize the report editor once all modules are loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded: Initializing report editor from direct module load');
+            if (typeof initializeEditor === 'function') {
+                initializeEditor();
+            } else {
+                console.error('initializeEditor function not found - loading modules failed');
+            }
+        });
+    </script>
+</body>
+</html>

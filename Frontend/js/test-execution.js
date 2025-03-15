@@ -5,20 +5,19 @@ class TestExecutionManager {
         this.lastOutput = '';
         this.startTime = null;
         this.activeTests = new Map();
-        this.baseUrl = 'http://127.0.0.1:8000'; // Базовый URL API
+        this.baseUrl = config.API_BASE_URL;
         console.log('TestExecutionManager initialized');
     }
 
     async executeTest(testCaseId) {
         console.log('executeTest called with ID:', testCaseId);
         try {
-            const response = await fetch(`${this.baseUrl}/api/execute-test/${testCaseId}/`, {
+            const response = await fetch(`${this.baseUrl}${config.API_PREFIX}/execute-test/${testCaseId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('access')}`
-                },
-                body: JSON.stringify({})
+                }
             });
 
             if (!response.ok) {

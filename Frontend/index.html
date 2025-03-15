@@ -10,6 +10,7 @@
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         .calendar-day {
             width: 40px;
@@ -77,31 +78,23 @@
                 <img src="images/FlowTest.png" alt="Company Logo" class="h-12 w-auto mb-8" data-i18n="companyLogo">
                 <nav class="space-y-2">
                     <a href="index.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        <span data-i18n="dashboard"></span>
+                        <i class="ri-dashboard-line text-xl mr-3"></i>
+                        <span data-i18n="dashboard">Панель управления</span>
                     </a>
 
-                    <a href="testcases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <span data-i18n="testCases"></span>
+                    <a href="test-cases.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
+                        <i class="ri-file-list-line text-xl mr-3"></i>
+                        <span data-i18n="testCases">Тест-кейсы</span>
                     </a>
 
                     <a href="events.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2"></path>
-                        </svg>
-                        <span data-i18n="events"></span>
+                        <i class="ri-calendar-event-line text-xl mr-3"></i>
+                        <span data-i18n="events">События</span>
                     </a>
 
                     <a href="reports.html" class="flex items-center p-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-coral-50 dark:hover:bg-gray-700 hover:text-coral-600 dark:hover:text-coral-400 group">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <span data-i18n="reports"></span>
+                        <i class="ri-file-chart-line text-xl mr-3"></i>
+                        <span data-i18n="reports">Отчеты</span>
                     </a>
                 </nav>
             </div>
@@ -156,6 +149,7 @@
                                 <div class="py-1">
                                     <a href="profilesettings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="profile">Profile</a>
                                     <a href="settingspage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="settings">Settings</a>
+                                    <a href="admin-panel.html" id="adminPanelLink" class="hidden block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="adminPanel">Admin Panel</a>
                                     <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" data-i18n="logout">Logout</button>
                                 </div>
                             </div>
@@ -171,58 +165,71 @@
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="totalTests">Total Tests</h3>
                         <p id="totalTests" class="text-3xl font-bold text-blue-600 dark:text-blue-400">-</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="fromLastMonth">from last month</p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="successRate">Success Rate</h3>
                         <p id="successRate" class="text-3xl font-bold text-green-600 dark:text-green-400">-</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="fromLastMonth">from last month</p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="avgExecutionTime">Avg. Execution Time</h3>
                         <p id="avgExecutionTime" class="text-3xl font-bold text-purple-600 dark:text-purple-400">-</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="from_last_month">from last month</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="fromLastMonth">from last month</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Success Rate Over Time -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="successRateOverTime">Success Rate Over Time</h2>
-                        <div class="h-64">
-                            <canvas id="successRateOverTime"></canvas>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="successRateOverTime">Success Rate Over Time</h3>
+                        <div class="chart-container">
+                            <canvas id="successRateChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Test Results Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testResultsDistribution">Test Results Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="resultsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Test Creation Activity -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testCreationActivity">Test Creation Activity</h3>
+                        <div class="chart-container">
+                            <canvas id="creationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Test Priority Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testPriorityDistribution">Test Priority Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contributors Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Author Stats -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="topContributors">Top Contributors</h3>
+                        <div id="authorStatsContainer" class="space-y-2">
+                            <!-- Author stats will be populated here -->
                         </div>
                     </div>
 
                     <!-- Test Flakiness -->
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testFlakiness">Test Flakiness</h2>
-                        <div style="height: 300px;">
-                            <canvas id="testFlakiness"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Priority Distribution -->
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="priorityDistribution">Priority Distribution</h2>
-                        <div class="h-64">
-                            <canvas id="priorityDistribution"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Results Distribution -->
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="resultsDistribution">Results Distribution</h2>
-                        <div class="h-64">
-                            <canvas id="resultsDistribution"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Test Case Creation -->
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testCaseCreation">Test Case Creation</h2>
-                        <div class="h-64">
-                            <canvas id="testCaseCreation"></canvas>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md lg:col-span-2">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4" data-i18n="testFlakiness">Нестабильные тесты</h3>
+                        <div class="chart-container">
+                            <div id="flakinessContainer">
+                                <!-- Здесь будет отображаться список нестабильных тестов -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -231,7 +238,9 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/translations.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/auth.js"></script>
@@ -239,12 +248,13 @@
     <script src="js/menu.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/auth-interceptor.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/projects.js"></script>
-    <script src="js/dashboard-charts.js"></script>
+    <script src="js/dashboard-charts.js?v=7"></script>
+    <script src="js/common.js"></script>
     <script src="js/notifications.js"></script>
-    <script src="js/user.js"></script>
+    <script src="js/user.js?v=4"></script>
     <script src="js/init.js"></script>
+    <!-- Блок активной инициализации убран, так как теперь всё в dashboard-charts.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
     <!-- Create Project Modal -->

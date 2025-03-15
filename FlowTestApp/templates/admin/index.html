@@ -1,0 +1,84 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style type="text/css">
+    /* Hide Django's default auth app which might cause duplication */
+    div.app-auth.module {
+        display: none !important;
+    }
+
+    /* Hide duplicate content */
+    .model-permission:nth-child(n+2),
+    .model-role:nth-child(n+2),
+    .model-customuser:nth-child(n+2),
+    .model-group {
+        display: none !important;
+    }
+
+    /* Make model apps more prominent */
+    .app-FlowTestApp .model {
+        padding: 8px;
+        margin-bottom: 5px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+    }
+
+    /* Custom styling for permissions and roles */
+    .model-permission a,
+    .model-role a {
+        color: #417690 !important;
+        font-weight: bold;
+    }
+
+    /* Consistent styling for all admin panels */
+    #content {
+        padding: 20px;
+    }
+
+    #content h1 {
+        margin-bottom: 20px;
+        color: #417690;
+    }
+
+    .dashboard .module h2,
+    .dashboard .module caption {
+        background: #417690;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<script type="text/javascript">
+    // JavaScript to remove any duplicate models after page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to remove duplicate app sections
+        function removeDuplicateApps() {
+            // Always hide auth app
+            var authApps = document.querySelectorAll('.app-auth');
+            authApps.forEach(function(app) {
+                app.style.display = 'none';
+            });
+            
+            // Remove duplicates for specific models
+            ['permission', 'role', 'customuser', 'group'].forEach(function(modelName) {
+                var models = document.querySelectorAll('.model-' + modelName);
+                if (models.length > 1) {
+                    // Keep only the first one
+                    for (var i = 1; i < models.length; i++) {
+                        models[i].style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        // Run on page load
+        removeDuplicateApps();
+        
+        // Also run after a short delay to catch any dynamic content
+        setTimeout(removeDuplicateApps, 100);
+    });
+</script>
+{% endblock %}

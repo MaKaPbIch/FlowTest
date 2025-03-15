@@ -1,6 +1,40 @@
 // Текущий язык
 let currentLanguage = 'en';
 
+// Объект с переводами
+const translations = {
+    en: {
+        "Profile Settings": "Profile Settings",
+        "Username": "Username",
+        "First Name": "First Name",
+        "Last Name": "Last Name",
+        "Email": "Email",
+        "Bio": "Bio",
+        "Save Changes": "Save Changes",
+        "Cancel": "Cancel",
+        "Change Password": "Change Password",
+        "Current Password": "Current Password",
+        "New Password": "New Password",
+        "Confirm Password": "Confirm New Password",
+        "Allowed formats: JPG, PNG, GIF": "Allowed formats: JPG, PNG, GIF"
+    },
+    ru: {
+        "Profile Settings": "Настройки профиля",
+        "Username": "Имя пользователя",
+        "First Name": "Имя",
+        "Last Name": "Фамилия",
+        "Email": "Email",
+        "Bio": "О себе",
+        "Save Changes": "Сохранить изменения",
+        "Cancel": "Отмена",
+        "Change Password": "Изменить пароль",
+        "Current Password": "Текущий пароль",
+        "New Password": "Новый пароль",
+        "Confirm Password": "Подтвердите пароль",
+        "Allowed formats: JPG, PNG, GIF": "Допустимые форматы: JPG, PNG, GIF"
+    }
+};
+
 // Функция для получения перевода
 function t(key) {
     if (!translations[currentLanguage] || !translations[currentLanguage][key]) {
@@ -45,7 +79,13 @@ async function setLanguage(lang) {
 // Функция для получения текущего языка с сервера
 async function getCurrentLanguage() {
     try {
-        const response = await fetchWithAuth('http://127.0.0.1:8000/api/users/language/');
+        const response = await fetchWithAuth('/api/users/language/');
+        if (response.status === 404) {
+            console.warn('Language endpoint not found, using default language');
+            currentLanguage = navigator.language.split('-')[0] || 'en';
+            updatePageTranslations();
+            return;
+        }
         if (response.ok) {
             const data = await response.json();
             currentLanguage = data.language;

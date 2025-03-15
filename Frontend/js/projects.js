@@ -21,74 +21,23 @@ async function refreshAccessToken() {
         localStorage.setItem('access', data.access);
         return data.access;
     } catch (error) {
-        // Удаляем токены только если не удалось их обновить
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         throw error;
     }
 }
 
-async function fetchWithAuth(url, options = {}) {
-    try {
-        // Добавляем токен к запросу
-        const token = localStorage.getItem('access');
-        if (!token) {
-            // Пробуем обновить токен, если его нет
-            const newToken = await refreshAccessToken();
-            token = newToken;
-        }
-
-        const authOptions = {
-            ...options,
-            headers: {
-                ...options.headers,
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        };
-
-        let response = await fetch(url, authOptions);
-
-        // Если получаем 401, пробуем обновить токен
-        if (response.status === 401) {
-            console.log('Token expired, attempting to refresh...');
-            try {
-                const newToken = await refreshAccessToken();
-                // Повторяем запрос с новым токеном
-                authOptions.headers['Authorization'] = `Bearer ${newToken}`;
-                response = await fetch(url, authOptions);
-            } catch (error) {
-                // Перенаправляем на страницу входа только если не удалось обновить токен
-                console.error('Failed to refresh token:', error);
-                window.location.href = 'http://127.0.0.1:8080/login.html';
-                throw error;
-            }
-        }
-
-        return response;
-    } catch (error) {
-        console.error('Auth error:', error);
-        throw error;
-    }
-}
-
 async function fetchProjects() {
-    console.log('Начинаем загрузку проектов...');
     try {
-        console.log('Отправляем запрос к API...');
-        const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/');
-        console.log('Получен ответ от API:', response);
-        
+        const response = await fetchWithAuth('/api/projects/');
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error('Failed to fetch projects');
         }
-        const projects = await response.json();
-        console.log('Получены проекты:', projects);
-        updateProjectSelect(projects);
-        updateProjectsList(projects);
+        return await response.json();
     } catch (error) {
-        console.error('Ошибка при получении проектов:', error);
-        // Не перенаправляем здесь на логин, так как это уже обрабатывается в fetchWithAuth
+        console.error('Error fetching projects:', error);
+        showNotification('Error loading projects', 'error');
+        throw error;
     }
 }
 
@@ -134,62 +83,39 @@ function updateProjectsList(projects) {
     });
 }
 
-async function fetchProjects() {
-    try {
-        const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const projects = await response.json();
-        updateProjectSelect(projects);
-        return projects;
-    } catch (error) {
-        console.error('Error fetching projects:', error);
-    }
-}
-
 function updateProjectSelect(projects) {
-    const selectElement = document.getElementById('projectSelector');
-    if (!selectElement) {
-        console.error('Project selector not found');
-        return;
-    }
+    const projectSelector = document.getElementById('projectSelector');
+    if (!projectSelector) return;
 
-    selectElement.innerHTML = '';
+    // Сохраняем текущий выбранный проект
+    const currentProjectId = projectSelector.value;
 
+    projectSelector.innerHTML = '';
+    
+    // Добавляем опцию по умолчанию
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = window.i18n.t('selectProject');
+    defaultOption.textContent = t('selectProject');
     defaultOption.disabled = true;
     defaultOption.selected = true;
-    selectElement.appendChild(defaultOption);
-
-    if (Array.isArray(projects) && projects.length > 0) {
-        projects.forEach(project => {
-            const option = document.createElement('option');
-            option.value = project.id;
-            option.textContent = project.name;
-            selectElement.appendChild(option);
-        });
-    }
-
-    // Восстанавливаем выбранный проект
-    const savedProject = localStorage.getItem('selectedProject');
-    if (savedProject) {
-        selectElement.value = savedProject;
-    }
-
-    selectElement.addEventListener('change', function() {
-        if (this.value) {
-            localStorage.setItem('selectedProject', this.value);
-            // Обновляем графики при смене проекта
-            if (window.dashboardManager) {
-                window.dashboardManager.updateCharts();
-            }
-        }
+    projectSelector.appendChild(defaultOption);
+    
+    // Добавляем проекты
+    projects.forEach(project => {
+        const option = document.createElement('option');
+        option.value = project.id;
+        option.textContent = project.name;
+        projectSelector.appendChild(option);
     });
+
+    // Восстанавливаем выбранный проект если он есть в списке
+    if (currentProjectId && projects.some(p => p.id === parseInt(currentProjectId))) {
+        projectSelector.value = currentProjectId;
+    }
+
+    // Вызываем событие change чтобы обновить графики
+    const event = new Event('change');
+    projectSelector.dispatchEvent(event);
 }
 
 async function createProject(event) {
@@ -205,7 +131,7 @@ async function createProject(event) {
     };
 
     try {
-        const response = await fetchWithAuth('http://127.0.0.1:8000/api/projects/', {
+        const response = await fetchWithAuth('/api/projects/', {
             method: 'POST',
             body: JSON.stringify(projectData)
         });
@@ -268,14 +194,93 @@ async function loadProjects() {
 }
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    loadProjects();
-    
-    // Привязываем обработчик к форме создания проекта
-    const createProjectForm = document.getElementById('createProjectForm');
-    if (createProjectForm) {
-        createProjectForm.addEventListener('submit', createProject);
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await loadProjects(); // Загрузка проектов
+        
+        // Привязываем обработчик к форме создания проекта
+        const createProjectForm = document.getElementById('createProjectForm');
+        if (createProjectForm) {
+            createProjectForm.addEventListener('submit', createProject);
+        }
+    } catch (error) {
+        console.error('Failed to initialize projects page:', error);
+        showNotification('Failed to load projects', 'error');
     }
 });
 
+// Инициализация селектора проектов
+function initializeProjectSelector() {
+    const projectSelector = document.getElementById('projectSelector');
+    if (projectSelector) {
+        projectSelector.addEventListener('change', async function() {
+            const selectedProject = this.value;
+            if (selectedProject) {
+                console.log('Project selected:', selectedProject);
+                try {
+                    await fetchData(selectedProject);
+                } catch (error) {
+                    console.error('Error loading project data:', error);
+                }
+            }
+        });
+    }
+}
+
+// Делаем функции доступными глобально
+window.initializeProjectSelector = initializeProjectSelector;
+
 console.log('projects.js загружен');
+
+// Function to load projects into selector with support for dashboard
+async function loadProjectsToSelector(selector) {
+    if (!selector) {
+        console.error('No selector provided for loadProjectsToSelector');
+        return;
+    }
+    
+    try {
+        const projects = await fetchProjects();
+        
+        // Сохраняем текущее выбранное значение, если оно есть
+        const currentValue = selector.value;
+        
+        // Очищаем селектор, сохраняя первый элемент (обычно "Все проекты")
+        const firstOption = selector.options[0];
+        selector.innerHTML = '';
+        if (firstOption) {
+            selector.appendChild(firstOption);
+        }
+        
+        // Добавляем проекты
+        projects.forEach(project => {
+            const option = document.createElement('option');
+            option.value = project.id;
+            option.textContent = project.name;
+            selector.appendChild(option);
+        });
+        
+        // Восстанавливаем выбранное значение, если оно есть в новом списке
+        if (currentValue) {
+            for (let i = 0; i < selector.options.length; i++) {
+                if (selector.options[i].value === currentValue) {
+                    selector.value = currentValue;
+                    break;
+                }
+            }
+        }
+        
+        // Если ничего не выбрано и есть проекты, выбираем первый проект
+        if (!selector.value && selector.options.length > 1) {
+            selector.value = selector.options[1].value;
+        }
+        
+        return projects;
+    } catch (error) {
+        console.error('Error loading projects into selector:', error);
+        return [];
+    }
+}
+
+// Делаем функцию доступной глобально для использования в других скриптах
+window.loadProjectsToSelector = loadProjectsToSelector;

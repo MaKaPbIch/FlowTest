@@ -1,0 +1,95 @@
+/* Custom styles for admin panel */
+
+/* Enhanced role selector */
+.field-role select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    padding: 10px 15px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+    background-color: white !important;
+    height: auto !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Submit buttons */
+.submit-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 20px !important;
+    background-color: #f5f5f5 !important;
+    border-radius: 8px !important;
+    margin-top: 30px !important;
+    border: 1px solid #eee !important;
+}
+
+.submit-row input[type="submit"] {
+    background-color: #417690 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 25px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    border-radius: 4px !important;
+    transition: background-color 0.3s !important;
+}
+
+.submit-row input[type="submit"]:hover {
+    background-color: #2c5970 !important;
+}
+
+.submit-row a.closelink {
+    background-color: #e74c3c !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 25px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    transition: background-color 0.3s !important;
+    line-height: 1.15 !important;
+}
+
+.submit-row a.closelink:hover {
+    background-color: #c0392b !important;
+}
+
+/* Form fields */
+.vTextField,
+.vURLField,
+.vEmailField,
+.vLargeTextField,
+.vIntegerField,
+.vDateField,
+.vTimeField,
+.vDateTimeField {
+    display: block !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    padding: 10px 15px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.vTextField:focus,
+.vURLField:focus,
+.vEmailField:focus,
+.vLargeTextField:focus,
+.vIntegerField:focus,
+.vDateField:focus,
+.vTimeField:focus,
+.vDateTimeField:focus {
+    border-color: #417690 !important;
+    box-shadow: 0 0 8px rgba(65, 118, 144, 0.3) !important;
+    outline: none !important;
+}

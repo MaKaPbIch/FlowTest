@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowTest - Create User</title>
+    
+    <!-- Styles -->
+    <link href="css/tailwind.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Create New User</h1>
+            
+            <form id="createUserForm">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                        <input type="text" id="username" name="username" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <input type="password" id="password" name="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
+                        <input type="text" id="firstName" name="first_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
+                        <input type="text" id="lastName" name="last_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="middleName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Middle Name</label>
+                        <input type="text" id="middleName" name="middle_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label for="userStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="userStatus" name="is_active" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-coral-500 focus:ring-coral-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-coral-600 hover:bg-coral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500">
+                        Create User
+                    </button>
+                </div>
+            </form>
+            
+            <div id="userCreationMessage" class="mt-4 p-4 rounded-md hidden"></div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const createUserForm = document.getElementById('createUserForm');
+            const messageArea = document.getElementById('userCreationMessage');
+            
+            createUserForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                const submitButton = createUserForm.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creating...';
+                submitButton.disabled = true;
+                
+                try {
+                    // Gather form data
+                    const userData = {
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value,
+                        first_name: document.getElementById('firstName').value,
+                        last_name: document.getElementById('lastName').value,
+                        middle_name: document.getElementById('middleName').value || '',
+                        email: document.getElementById('email').value,
+                        is_active: document.getElementById('userStatus').value === 'true'
+                    };
+                    
+                    // Add user authorization if available
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    
+                    // Try to get token from localStorage
+                    const token = localStorage.getItem('accessToken');
+                    if (token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    
+                    // Send the request to create user endpoint
+                    const response = await fetch(`${config.API_BASE_URL}/create-user/`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(userData),
+                        credentials: 'include' // Include cookies for session auth
+                    });
+                    
+                    // Process response
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('User created successfully:', result);
+                        
+                        // Show success message
+                        messageArea.textContent = `User "${userData.username}" created successfully!`;
+                        messageArea.className = 'mt-4 p-4 rounded-md bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100';
+                        messageArea.classList.remove('hidden');
+                        
+                        // Reset form
+                        createUserForm.reset();
+                        
+                        // Close window automatically after 3 seconds
+                        setTimeout(() => {
+                            window.close();
+                        }, 3000);
+                    } else {
+                        let errorText = `Error: ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            errorText = JSON.stringify(errorData, null, 2);
+                        } catch (e) {
+                            console.error('Error parsing error response:', e);
+                        }
+                        
+                        // Show error message
+                        messageArea.textContent = `Failed to create user: ${errorText}`;
+                        messageArea.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100';
+                        messageArea.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                    
+                    // Show error message
+                    messageArea.textContent = `An error occurred: ${error.message}`;
+                    messageArea.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100';
+                    messageArea.classList.remove('hidden');
+                } finally {
+                    // Restore button state
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

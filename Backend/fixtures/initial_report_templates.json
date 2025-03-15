@@ -1,0 +1,158 @@
+[
+    {
+        "model": "report_models.metric",
+        "pk": 1,
+        "fields": {
+            "name": "successfulTests",
+            "display_name": "Successful Tests",
+            "description": "Number of successfully executed tests",
+            "data_type": "number",
+            "calculation_method": "count_successful",
+            "icon": "ri-check-line"
+        }
+    },
+    {
+        "model": "report_models.metric",
+        "pk": 2,
+        "fields": {
+            "name": "averageTime",
+            "display_name": "Average Execution Time",
+            "description": "Average time to execute tests",
+            "data_type": "duration",
+            "calculation_method": "calculate_average_time",
+            "icon": "ri-time-line"
+        }
+    },
+    {
+        "model": "report_models.metric",
+        "pk": 3,
+        "fields": {
+            "name": "totalTests",
+            "display_name": "Total Tests",
+            "description": "Total number of tests executed",
+            "data_type": "number",
+            "calculation_method": "count_total",
+            "icon": "ri-file-list-line"
+        }
+    },
+    {
+        "model": "report_models.charttype",
+        "pk": 1,
+        "fields": {
+            "name": "executionTrends",
+            "display_name": "Execution Trends",
+            "description": "Shows test execution trends over time",
+            "config_schema": {
+                "type": "object",
+                "properties": {
+                    "timeRange": {
+                        "type": "string",
+                        "enum": ["day", "week", "month"]
+                    },
+                    "showLegend": {
+                        "type": "boolean"
+                    },
+                    "stackBars": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "model": "report_models.charttype",
+        "pk": 2,
+        "fields": {
+            "name": "statusDistribution",
+            "display_name": "Status Distribution",
+            "description": "Shows distribution of test execution statuses",
+            "config_schema": {
+                "type": "object",
+                "properties": {
+                    "chartType": {
+                        "type": "string",
+                        "enum": ["pie", "doughnut", "bar"]
+                    },
+                    "showPercentages": {
+                        "type": "boolean"
+                    },
+                    "showLabels": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "model": "report_models.reporttemplate",
+        "pk": 1,
+        "fields": {
+            "name": "Test Execution Overview",
+            "description": "Overview of test execution results and trends",
+            "created_by": 1,
+            "created_at": "2024-02-09T00:00:00Z",
+            "updated_at": "2024-02-09T00:00:00Z",
+            "metrics": [
+                {
+                    "name": "successfulTests",
+                    "position": 1
+                },
+                {
+                    "name": "averageTime",
+                    "position": 2
+                },
+                {
+                    "name": "totalTests",
+                    "position": 3
+                }
+            ],
+            "charts": [
+                {
+                    "id": "executionTrends",
+                    "type": "executionTrends",
+                    "title": "Execution Trends",
+                    "config": {
+                        "timeRange": "week",
+                        "showLegend": true,
+                        "stackBars": false
+                    }
+                },
+                {
+                    "id": "statusDistribution",
+                    "type": "statusDistribution",
+                    "title": "Status Distribution",
+                    "config": {
+                        "chartType": "pie",
+                        "showPercentages": true,
+                        "showLabels": true
+                    }
+                }
+            ],
+            "filters": {
+                "dateRange": {
+                    "type": "dateRange",
+                    "default": "last24Hours"
+                },
+                "testType": {
+                    "type": "multiSelect",
+                    "options": ["Unit", "Integration", "E2E"]
+                }
+            },
+            "layout": {
+                "metrics": {
+                    "columns": 3
+                },
+                "charts": {
+                    "executionTrends": {
+                        "width": 8,
+                        "height": 400
+                    },
+                    "statusDistribution": {
+                        "width": 4,
+                        "height": 400
+                    }
+                }
+            }
+        }
+    }
+]

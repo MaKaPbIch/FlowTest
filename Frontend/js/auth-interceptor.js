@@ -11,149 +11,128 @@ function savePreLoginPreferences() {
     localStorage.setItem('preLoginLanguage', lang);
 }
 
-// Apply pre-login preferences after successful login
-function applyPreLoginPreferences() {
+// Function to restore preferences after login
+function restorePreLoginPreferences() {
     const theme = localStorage.getItem('preLoginTheme');
     const lang = localStorage.getItem('preLoginLanguage');
+    
     if (theme) {
-        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     }
+    
     if (lang) {
-        localStorage.setItem('language', lang);
-    }
-}
-
-// Check if token is expired
-function isTokenExpired(token) {
-    if (!token) return true;
-    
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const expirationTime = payload.exp * 1000; // Convert to milliseconds
-        return Date.now() >= expirationTime;
-    } catch (e) {
-        console.error('Error checking token expiration:', e);
-        return true;
-    }
-}
-
-async function refreshToken() {
-    const refresh = localStorage.getItem('refresh');
-    if (!refresh) {
-        window.location.href = '/login.html';
-        return null;
-    }
-
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/token/refresh/', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ refresh }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to refresh token');
+        document.documentElement.setAttribute('lang', lang);
+        // If i18n is loaded, update the language
+        if (typeof setLanguage === 'function') {
+            setLanguage(lang);
         }
-
-        const data = await response.json();
-        localStorage.setItem('access', data.access);
-        return data.access;
-    } catch (error) {
-        console.error('Error refreshing token:', error);
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
-        window.location.href = '/login.html';
-        return null;
     }
 }
 
-// Fetch with automatic token refresh
+// Fetch with authentication
 async function fetchWithAuth(url, options = {}) {
-    if (isLoginPage()) {
-        return fetch(url, options);
-    }
-
-    let token = localStorage.getItem('access');
+    // FORCE the base URL to ensure consistency
+    const API_BASE = 'http://127.0.0.1:8000';
     
-    // Check if token exists and is not expired
-    if (!token || isTokenExpired(token)) {
-        console.log('Token missing or expired, attempting refresh');
-        token = await refreshToken();
-        if (!token) {
-            savePreLoginPreferences();
-            window.location.href = '/login.html';
-            return;
+    // Ensure paths are correctly formed - standardizing URL handling
+    let fullUrl;
+    if (url.startsWith('http')) {
+        fullUrl = url;
+    } else {
+        // URL construction
+        let path = url;
+        
+        // Remove any duplicate /api prefixes
+        // First, remove leading slash for consistent processing
+        if (path.startsWith('/')) {
+            path = path.slice(1);
         }
+        
+        // Don't add api/ if it's already there
+        if (!path.startsWith('api/')) {
+            path = `api/${path}`;
+        }
+        
+        // Make sure we don't double up on slashes
+        fullUrl = `${API_BASE}/${path}`;
     }
-
-    // Add authorization header
-    const authOptions = {
+    
+    console.log('Normalized request URL:', fullUrl);
+    
+    const token = localStorage.getItem('access');
+    
+    if (!token && !isLoginPage()) {
+        // Redirect to login if no token found (except on login page)
+        window.location.href = '/login.html';
+        throw new Error('No authentication token found');
+    }
+    
+    // Set up headers with authentication token
+    const headers = options.headers || {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Merge options
+    const fetchOptions = {
         ...options,
         headers: {
-            'Accept': 'application/json',
             'Content-Type': 'application/json',
-            ...(options.headers || {}),
-            'Authorization': `Bearer ${token}`
+            ...headers
         }
     };
-
-    // Если тело запроса - FormData, удаляем Content-Type
-    if (options.body instanceof FormData) {
-        delete authOptions.headers['Content-Type'];
-    }
-
+    
     try {
-        let response = await fetch(url, authOptions);
+        // First attempt with normalized URL
+        console.log('Trying request with URL:', fullUrl);
+        let response = await fetch(fullUrl, fetchOptions);
         
-        // If we get a 401, try to refresh the token
-        if (response.status === 401) {
-            console.log('Got 401, attempting token refresh');
-            token = await refreshToken();
-            if (token) {
-                // Retry the request with the new token
-                authOptions.headers['Authorization'] = `Bearer ${token}`;
-                response = await fetch(url, authOptions);
+        // If we get a 404, try a direct call with absolute URL as fallback
+        if (response.status === 404 && !fullUrl.startsWith('http')) {
+            // Be smart about fallbacks - try various patterns if we get a 404
+            const API_BASE = 'http://127.0.0.1:8000';
+            let fallbackPath = url;
+            
+            // Try without api/ prefix if it was already there
+            if (url.startsWith('api/') || url.startsWith('/api/')) {
+                fallbackPath = url.replace(/^(\/?api\/)/, '');
+            }
+            
+            const backupUrl = `${API_BASE}/api/${fallbackPath.replace(/^\//, '')}`;
+            console.log('Got 404, trying alternative URL format:', backupUrl);
+            response = await fetch(backupUrl, fetchOptions);
+        }
+        
+        // Handle 401 (unauthorized)
+        if (response.status === 401 && !isLoginPage()) {
+            console.log('Unauthorized, trying to refresh token...');
+            
+            // Try to refresh the token
+            const refreshed = await refreshToken();
+            
+            if (refreshed) {
+                console.log('Token refreshed, retrying request...');
+                // Get the new token
+                const newToken = localStorage.getItem('access');
+                // Update Authorization header
+                fetchOptions.headers['Authorization'] = `Bearer ${newToken}`;
+                // Retry the fetch
+                return fetch(fullUrl, fetchOptions);
             } else {
+                // If refresh failed, redirect to login
                 savePreLoginPreferences();
                 window.location.href = '/login.html';
-                return;
+                throw new Error('Session expired, please login again');
             }
         }
         
         return response;
     } catch (error) {
-        console.error('Network error:', error);
+        console.error('Error in fetchWithAuth:', error);
         throw error;
     }
-}
-
-// Make function globally available
-window.fetchWithAuth = fetchWithAuth;
-
-// Function to view logs
-window.showAuthLogs = function() {
-    const logs = JSON.parse(sessionStorage.getItem('auth_logs') || '[]');
-    console.table(logs);
-    return logs;
-};
-
-// Clear logs
-window.clearAuthLogs = function() {
-    sessionStorage.removeItem('auth_logs');
-    console.log('Auth logs cleared');
-};
-
-// Функция для логирования
-function logAuth(message, type = 'info') {
-    const logs = JSON.parse(sessionStorage.getItem('auth_logs') || '[]');
-    logs.push({
-        timestamp: new Date().toISOString(),
-        type: type,
-        message: message
-    });
-    sessionStorage.setItem('auth_logs', JSON.stringify(logs));
-    console.log(`[${type}] ${message}`);
 }

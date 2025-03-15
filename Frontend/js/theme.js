@@ -1,31 +1,60 @@
-// Theme management
-const ThemeManager = {
-    init() {
-        this.themeToggle = document.getElementById('theme-toggle');
-        if (this.themeToggle) {
-            this.themeToggle.addEventListener('click', () => this.toggleTheme());
+// Проверяем, не определен ли уже ThemeManager
+if (typeof window.ThemeManager === 'undefined') {
+    class ThemeManager {
+        constructor() {
+            this.theme = localStorage.getItem('theme') || config.DEFAULT_THEME;
+            this.init();
         }
 
-        // Set initial theme
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
+        init() {
+            // Применяем тему при инициализации
+            this.applyTheme(this.theme);
+            
+            // Добавляем слушатель для переключения темы
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => this.toggleTheme());
+            }
         }
-    },
 
-    toggleTheme() {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
+        applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            // Сохраняем тему в localStorage
+            localStorage.setItem('theme', theme);
+            this.theme = theme;
+            
+            // Обновляем иконку переключателя
+            this.updateToggleIcon();
+        }
+
+        toggleTheme() {
+            const newTheme = this.theme === 'dark' ? 'light' : 'dark';
+            this.applyTheme(newTheme);
+        }
+
+        updateToggleIcon() {
+            const themeToggleIcon = document.getElementById('theme-toggle-icon');
+            if (themeToggleIcon) {
+                if (this.theme === 'dark') {
+                    themeToggleIcon.classList.remove('fa-moon');
+                    themeToggleIcon.classList.add('fa-sun');
+                } else {
+                    themeToggleIcon.classList.remove('fa-sun');
+                    themeToggleIcon.classList.add('fa-moon');
+                }
+            }
+        }
+
+        getCurrentTheme() {
+            return this.theme;
         }
     }
-};
 
-// Initialize theme management when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    ThemeManager.init();
-});
+    // Создаем глобальный экземпляр ThemeManager
+    window.themeManager = new ThemeManager();
+}
